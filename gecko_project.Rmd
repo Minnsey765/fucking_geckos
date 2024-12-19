@@ -1,0 +1,482 @@
+---
+title: "gecko_project"
+output: pdf_document
+date: "2024-11-27"
+---
+
+```{r}
+#set working directory and read in data
+setwd("C://Users//ojmin//OneDrive//Documents//UNI//Zoology_partII//Borneo_Project")
+data <-read.csv("brno_gecko_dist_data.csv")
+print(data)
+```
+
+```{r}
+#divide dataset into zones
+general_splicer <- function(data, name, column) {
+  # check (zone) column in question is present
+  if (!column %in% colnames(data)) {
+    stop("The dataset does not contain a ", column, " column.")
+  }
+
+  # find all unique values from column
+  unique_vals <- unique(data[[column]])
+
+  # create separate datasets for each unique value in column
+  for (q in unique_vals) {
+    # subset the data
+    
+    subset_data <- data[data[[column]] == q, ]
+    
+    # assign subsetted data a variable name based on unique value
+    assign(paste0(name, q), subset_data, envir = .GlobalEnv)
+  }
+  
+  message("Datasets created for each ", column, " value!")
+  message("Empty datasets are not generated! (except for NA apparently)")
+}
+
+general_splicer(data, "brno_zone", "zone")
+#brno_zone1
+#brno_zone2
+#brno_zone3
+```
+```{r}
+# function to collect datasets with a specific prefix into a list
+collect_datasets_to_list <- function(prefix, suffix) {
+  # Get all objects in the global environment
+  all_objects <- ls(envir = .GlobalEnv)
+  
+  #ending may not need to be specified
+  if (suffix == "none"){
+  # Filter objects that start with the given prefix
+  dataset_names <- grep(paste0(prefix), all_objects, value = TRUE)
+  } else {
+    dataset_names <- grep(paste0(prefix, ".*", suffix), all_objects, value = TRUE)
+  }
+  # Create a named list of these datasets
+  dataset_list <- lapply(dataset_names, function(name) get(name, envir = .GlobalEnv))
+  names(dataset_list) <- dataset_names
+  
+  return(dataset_list)
+}
+
+# Example usage:
+# Assume datasets 'dataset_a', 'dataset_b', 'dataset_c' exist in the global environment
+zone_list <- collect_datasets_to_list("brno_zone", "none")
+
+
+names(zone_list)
+```
+```{r}
+#divide dataset up by data + zone
+date_splicer <- function(dataset_names, column){
+  #iterate through each dataset
+  for (name in names(dataset_names)){
+    #collect the first part of old dataset name for new name
+    new_name <- paste0(substr(name, start = 6, stop = 10), "_")
+    #call splicing function to divide dataset and use new naming convention
+    general_splicer(dataset_names[[name]], new_name, column)
+  }
+}
+
+date_splicer(zone_list, "date")
+#put these into a datasetlist
+zone_date_list <- collect_datasets_to_list("zone", "2024")
+names(zone_date_list)
+```
+```{r}
+#divide dateset up into time + date + zone
+time_splicer <- function(dataset_names, column){
+  #iterate through each dataset
+  for (name in names(dataset_names)){
+    #collect the first part of old dataset name for new name
+    new_name <- paste0(substr(name, start = 1, stop = 8), "_")
+    #call splicing function to divide dataset and use new naming convention
+    general_splicer(dataset_names[[name]], new_name, column)
+  }
+}
+
+time_splicer(zone_date_list, "time")
+
+#generate datasetlist
+#this specifies that the suffix that should be at the end of new datasets is 2 digits an underscore and a letter "XX_a"
+zone_date_time_list <- collect_datasets_to_list("zone", "_\\d{2}_[a-zA-Z]$")
+names(zone_date_time_list)
+```
+
+```{r}
+#Divide data up into distinct events (zone + data + sample time + quadrat)
+
+event_splicer <- function(dataset_names, column){
+  #iterate through each dataset
+  for (name in names(dataset_names)){
+    #collect the first part of old dataset name for new name
+    new_name <- paste0(substr(name, start = 1, stop = 10), "_")
+    #call splicing function to divide dataset and use new naming convention
+    general_splicer(dataset_names[[name]], new_name, column)
+  }
+}
+
+event_splicer(zone_date_time_list, "quadrat")
+
+#make dataset list of all events
+event_list <- collect_datasets_to_list("zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+names(event_list)
+```
+```{r}
+# remove data with questionable measurements
+data_filter <- function(dataset_names, column1, column2, val1, val2){
+  #iterate through each dataset
+  for (name in names(dataset_names)){
+    #collect the first part of old dataset name for new name
+    new_name <- paste0("fltr_", name)
+    #filter the data for column1
+    data = dataset_names[[name]]
+    filtered_data0 <- data[data[[column1]]!= val1,]
+    
+    #refilter for column 2
+    filtered_data <- filtered_data0[filtered_data0[[column2]] != val2,]
+    
+    # assign subsetted data a variable name based on unique value
+    assign(new_name, filtered_data, envir = .GlobalEnv)
+  }
+}
+#create filtered event datasets
+data_filter(event_list, "gecko_present", "bad_img_qua", 0, 1)
+
+#create a list of filtered events
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+names(fltr_event_list)
+```
+```{r}
+#zone1_12_n_e2
+#fltr_zone1_12_n_e2
+
+#filter the rest of the datasets starting with zones at some point
+
+```
+
+```{r}
+#find the maximum value of a column and generate an adjacent column with the normalised data
+normaliser <- function(data, old_col, new_col, dataset_name){
+  #ensure column is numeric
+  data[[old_col]] = as.numeric(data[[old_col]])
+  
+  #find max value in column and exclude NA
+  max <- max(data[[old_col]], na.rm = TRUE)
+  
+  #normalise the data in new column, ignoring NA
+  normalised <- ifelse(!is.na(data[[old_col]]), 
+                        data[[old_col]] / max, 
+                        NA)
+  #specify where new column is added
+  
+  #determine original column positon
+  original_position <- which(colnames(data) == old_col)
+  #insert new column
+  data <- cbind(data[, 1:original_position, drop = FALSE], setNames(data.frame(normalised), new_col), data[, (original_position + 1):ncol(data), drop = FALSE])
+  
+  #assign new dataset to global env
+  assign(dataset_name, data, envir = .GlobalEnv)
+  #return(data)
+}
+
+#normaliser(fltr_zone1_11_n_e11, "dist_light_cm", "rel_dist", "fltr_zone1_11_n_e11")
+#fltr_zone1_11_n_e11
+```
+
+```{r}
+# loop the normaliser function for set of datasets
+general_normaliser <- function(dataset_names, old_col, new_col){
+  #iterate through each dataset
+  for (name in names(dataset_names)){
+    #run normaliser function for the desired column
+    normaliser(dataset_names[[name]], old_col, new_col, name)
+  }
+}
+#normalise for length_cm and add to large dataset
+general_normaliser(fltr_event_list, "length_cm", "rel_len")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for svl_cm
+general_normaliser(fltr_event_list, "svl_cm", "rel_svl")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for width_cm
+general_normaliser(fltr_event_list, "width_cm", "rel_wid")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for len_vol_cm3
+general_normaliser(fltr_event_list, "len_vol_cm3", "rel_len_vol")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for svl_vol_cm3
+general_normaliser(fltr_event_list, "svl_vol_cm3", "rel_svl_vol")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for disp_light_cm
+general_normaliser(fltr_event_list, "disp_light_cm", "rel_disp")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for dist_light_cm
+general_normaliser(fltr_event_list, "dist_light_cm", "rel_dist")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+```
+```{r}
+#generate a rank column for data
+ranker <- function(data, old_col, new_col, dataset_name){
+  #ensure column is numeric
+  data[[old_col]] = as.numeric(data[[old_col]])
+  
+  #rank the data in new column, ignoring NA
+  normalised <- ifelse(!is.na(data[[old_col]]), 
+                        rank(-data[[old_col]], ties.method = "average"), 
+                        NA)
+  #specify where new column is added
+  
+  #determine original column positon
+  original_position <- which(colnames(data) == old_col)
+  #insert new column
+  data <- cbind(data[, 1:original_position, drop = FALSE], setNames(data.frame(normalised), new_col), data[, (original_position + 1):ncol(data), drop = FALSE])
+  
+  #assign new dataset to global env
+  assign(dataset_name, data, envir = .GlobalEnv)
+  #return(data)
+}
+
+#ranker(fltr_zone1_12_n_e2, "rel_len", "len_rank", "fltr_zone1_12_n_e2")
+#fltr_zone1_12_n_e2
+
+#Loop this function for all datasets in a list
+general_ranker <- function(dataset_names, old_col, new_col){
+  #iterate through each dataset
+  for (name in names(dataset_names)){
+    #run normaliser function for the desired column
+    ranker(dataset_names[[name]], old_col, new_col, name)
+  }
+}
+
+#rank rel_len and add to large dataset
+general_ranker(fltr_event_list, "rel_len", "len_rank")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for rel_svl
+general_ranker(fltr_event_list, "rel_svl", "svl_rank")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for rel_wid
+general_ranker(fltr_event_list, "rel_wid", "wid_rank")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for rel_len_vol
+general_ranker(fltr_event_list, "rel_len_vol", "len_vol_rank")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for rel_svl_vol
+general_ranker(fltr_event_list, "rel_svl_vol", "svl_vol_rank")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for rel_disp
+general_ranker(fltr_event_list, "disp_light_cm", "disp_rank")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+
+#repeat for rel_dist
+general_ranker(fltr_event_list, "dist_light_cm", "dist_rank")
+fltr_event_list <- collect_datasets_to_list("fltr_zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
+```
+
+```{r}
+#check all updated datasets are present and correct in database
+fltr_event_list
+```
+```{r}
+#grouping filtered events into new dataset list based on time of day
+event_time_compiler <- function(prefix, suffix, middle){
+  #find all global objects
+  all_objects <- ls(envir = .GlobalEnv)
+  
+  #filter objects with correct pattern
+  matching_datasets <- grep(paste0(prefix, middle, suffix), all_objects, value = TRUE)
+  
+  #extract datasets from global ENV
+  dataset_list <- lapply(matching_datasets, function(name) get(name, envir = .GlobalEnv))
+  
+  names(dataset_list) <- matching_datasets
+  return(dataset_list)
+  
+  # Create a named list of these datasets
+  #dataset_names <- names(dataset_list)
+  #return(dataset_names)
+  #return(extracted_values)
+}
+
+#make list for all night events
+fltr_event_night_list <- (event_time_compiler("fltr_zone\\d_\\d{2}_", "_[a-z]\\d{1,2}", "n"))
+
+#make list for all afternoon events
+fltr_event_afternoon_list <- (event_time_compiler("fltr_zone\\d_\\d{2}_", "_[a-z]\\d{1,2}", "a"))
+
+#make list for all morning events
+fltr_event_morning_list <- (event_time_compiler("fltr_zone\\d_\\d{2}_", "_[a-z]\\d{1,2}", "m"))
+
+
+```
+
+```{r}
+fltr_event_night_list
+```
+
+```{r}
+#make plotting function
+mega_plotter <- function(datasets, xvar, yvar, xlab, ylab, xlim, ylim, title, colour){
+  #initialise plot with point at (0,0)
+  plot(0, 0, xlab = xlab, ylab = ylab, xlim=c(0,xlim), ylim=c(0,ylim),main = title, col = 'red')
+  #iterate through datasets
+  print(datasets)
+  for (name in names(datasets)){
+    #plot points of all datasets in list
+    data = datasets[[name]]
+    points(data[[xvar]], data[[yvar]], col = colour)
+  }
+}
+
+#plot ranked svl vol against raw, relative, and ranked displacement and distance
+
+#displacement
+mega_plotter(fltr_event_night_list, "svl_vol_rank", "disp_light_cm", "Ranked SVL volume", "Displacement from light source", 15, 300,"Ranked SVL volume against displacement", 'black')
+
+mega_plotter(fltr_event_night_list, "svl_vol_rank", "rel_disp", "Ranked SVL volume", "Relative displacement from light source", 15, 1, "Ranked SVL volume against relative displacement", 'black')
+
+mega_plotter(fltr_event_night_list, "svl_vol_rank", "disp_rank", "Ranked SVL volume", "Ranked displacement from light source", 15, 15, "Ranked SVL volume against ranked displacement", 'black')
+
+#distance
+mega_plotter(fltr_event_night_list, "svl_vol_rank", "dist_light_cm", "Ranked SVL volume", "Distance from light source", 15, 300, "Ranked SVL volume against distance", 'black')
+
+mega_plotter(fltr_event_night_list, "svl_vol_rank", "rel_dist", "Ranked SVL volume", "Relative distance from light source", 15, 1, "Ranked SVL volume against relative distance", 'black')
+
+mega_plotter(fltr_event_night_list, "svl_vol_rank", "dist_rank", "Ranked SVL volume", "Ranked distance from light source", 15, 15, "Ranked SVL volume against ranked distance", 'black')
+```
+```{r}
+#relative SVL vol against raw, relative, ranked displacement and distance
+
+#displacement
+mega_plotter(fltr_event_night_list, "rel_svl_vol", "disp_light_cm", "Relative SVL volume", "Displacement from light source", 1, 300,"Relative SVL volume against displacement", 'black')
+
+mega_plotter(fltr_event_night_list, "rel_svl_vol", "rel_disp", "Relative SVL volume", "Relative displacement from light source", 1, 1, "Relative SVL volume against relative displacement", 'black')
+
+mega_plotter(fltr_event_night_list, "rel_svl_vol", "disp_rank", "Relative SVL volume", "Ranked displacement from light source", 1, 15, "Relative SVL volume against ranked displacement", 'black')
+
+#distance
+mega_plotter(fltr_event_night_list, "rel_svl_vol", "dist_light_cm", "Relative SVL volume", "Distance from light source", 1, 300, "Relative SVL volume against distance", 'black')
+
+mega_plotter(fltr_event_night_list, "rel_svl_vol", "rel_dist", "Relative SVL volume", "Relative distance from light source", 1, 1, "Relative SVL volume against relative distance", 'black')
+
+mega_plotter(fltr_event_night_list, "rel_svl_vol", "dist_rank", "Relative SVL volume", "Relative distance from light source", 1, 15, "Relative SVL volume against relative distance", 'black')
+
+```
+```{r}
+multi_plotter <- function(datasets1, datasets2, datasets3, xvar, yvar, xlab, ylab, xlim, ylim, title, colour1, colour2, colour3){
+  #call megaplotter function to plot first plot
+  mega_plotter(datasets1, xvar, yvar, xlab, ylab, xlim, ylim, title, colour1)
+  #check datasets2 exists
+  if (is.list(datasets2)){
+    #plot 2nd dataset
+    for (name in names(datasets2)){
+    #plot points of all datasets in list
+    data = datasets2[[name]]
+    points(data[[xvar]], data[[yvar]], col = colour2)
+    }
+  }
+  else{
+      print("no secondary dataset")
+  }
+  #check datasets3 exists
+  if (is.list(datasets3)){
+    #plot 2nd dataset
+    for (name in names(datasets3)){
+    #plot points of all datasets in list
+    data = datasets3[[name]]
+    points(data[[xvar]], data[[yvar]], col = colour3)
+    }
+  }
+  else{
+      print("no secondary dataset")
+  }
+}
+
+multi_plotter(fltr_event_night_list, fltr_event_afternoon_list, fltr_event_afternoon_list, "svl_vol_rank", "disp_light_cm", "Ranked SVL volume", "Displacement from light source", 15, 300,"Ranked SVL volume against displacement", 'black', 'orange', 'blue')
+```
+```{r}
+multi_plotter2 <- function(datasets1, oth_datasets, xvar, yvar, xlab, ylab, xlim, ylim, title, colour1, colours){
+  #call megaplotter function to plot first plot
+  mega_plotter(datasets1, xvar, yvar, xlab, ylab, xlim, ylim, title, colour1)
+  #check oth_datasets exists
+  if (is.list(oth_datasets)){
+    # start a counter for i that counts each dataset list read
+    i <- 1
+    #iterate through list of dataset lists
+    for (i in length(oth_datasets)){
+      #extract each dataset list from the list of dataset lists
+      datasets <- oth_datasets[[i]]
+      for (name in names(datasets)){
+    #plot points of all datasets in list
+    data = datasets[[name]]
+    points(data[[xvar]], data[[yvar]], col = colours[i])
+      }
+      #increase i
+      i <- i + 1
+  }
+    }
+    
+  else{
+      print("no secondary dataset")
+  }
+}
+
+multi_plotter2(fltr_event_night_list, list(fltr_event_afternoon_list, fltr_event_morning_list), "svl_vol_rank", "disp_light_cm", "Ranked SVL volume", "Displacement from light source", 15, 300,"Ranked SVL volume against displacement", 'black', c('orange', 'blue'))
+```
+
+
+```{r}
+list(fltr_event_afternoon_list,fltr_event_morning_list)
+```
+```{r}
+test_list <- list(fltr_zone3_13_n_e1)
+print(fltr_zone3_13_n_e1)
+print(typeof(fltr_event_night_list))
+test_list <- fltr_event_night_list
+print(length(test_list))
+
+dad_plotter <- function(datasets, xvar, yvar, xlab, ylab, xlim, ylim, title, colour){
+  #initialise plot with point at (0,0)
+  plot(0, 0, xlab = xlab, ylab = ylab, xlim=c(xlim,0), ylim=c(0,ylim),main = title, col = 'red')
+  #iterate through datasets
+  for (data in datasets) {
+    points(data[[xvar]], data[[yvar]], col = colour)
+  }
+}
+dad_plotter(test_list, "svl_vol_rank", "disp_light_cm", "Ranked SVL volume", "Displacement from light source", 15, 300,"Ranked SVL volume against displacement", 'black')
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
