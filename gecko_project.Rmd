@@ -6,8 +6,8 @@ date: "2024-11-27"
 
 ```{r}
 #set working directory and read in data
-setwd("C://Users//ojmin//OneDrive//Documents//UNI//Zoology_partII//Borneo_Project")
-data <-read.csv("brno_gecko_dist_data.csv")
+#setwd("C://Users//ojmin//OneDrive//Documents//UNI//Zoology_partII//Borneo_Project")
+data <-read.csv("data-raw/brno_gecko_dist_data.csv")
 print(data)
 ```
 
