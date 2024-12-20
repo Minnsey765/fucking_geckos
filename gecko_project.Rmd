@@ -21,13 +21,13 @@ source("R/DataManipulationDeprecated.R") # TODO remove once all functions are re
 
 ```{r}
 #set working directory and read in data
-data <-read.csv("data-raw/brno_gecko_dist_data.csv")
-print(data)
+data_raw <-read.csv("data-raw/brno_gecko_dist_data.csv")
+print(data_raw)
 ```
 
 
 ```{r}
-zone_list = dm.general_splicer(data, "brno_zone", "zone")
+zone_list = dm.general_splicer(data_raw, "brno_zone", "zone")
 print(names(zone_list))
 #print(brno_zones[["brno_zone1"]])
 
@@ -37,12 +37,15 @@ print(names(zone_list))
 #divide dataset up by data + zone
 zone_date_list = dm.date_splicer(zone_list, "date")
 names(zone_date_list)
+
+# optionally remove if no longer needed?
+# rm(zone_list)
 ```
 
 
 
 ```{r}
-
+# NOT YET REVIEWED FROM HERE
 
 
 #divide dateset up into time + date + zone
