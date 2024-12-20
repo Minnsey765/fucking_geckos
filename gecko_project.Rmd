@@ -4,88 +4,47 @@ output: pdf_document
 date: "2024-11-27"
 ---
 
+
+```{r}
+# Clear environment before running
+rm(list=ls())
+```
+
+
+```{r}
+# load functions
+source("R/DataManipulation.R")
+source("R/DataManipulationDeprecated.R") # TODO remove once all functions are replaced
+
+```
+
+
 ```{r}
 #set working directory and read in data
-#setwd("C://Users//ojmin//OneDrive//Documents//UNI//Zoology_partII//Borneo_Project")
 data <-read.csv("data-raw/brno_gecko_dist_data.csv")
 print(data)
 ```
 
+
 ```{r}
-#divide dataset into zones
-general_splicer <- function(data, name, column) {
-  # check (zone) column in question is present
-  if (!column %in% colnames(data)) {
-    stop("The dataset does not contain a ", column, " column.")
-  }
+zone_list = dm.general_splicer(data, "brno_zone", "zone")
+print(names(zone_list))
+#print(brno_zones[["brno_zone1"]])
 
-  # find all unique values from column
-  unique_vals <- unique(data[[column]])
-
-  # create separate datasets for each unique value in column
-  for (q in unique_vals) {
-    # subset the data
-    
-    subset_data <- data[data[[column]] == q, ]
-    
-    # assign subsetted data a variable name based on unique value
-    assign(paste0(name, q), subset_data, envir = .GlobalEnv)
-  }
-  
-  message("Datasets created for each ", column, " value!")
-  message("Empty datasets are not generated! (except for NA apparently)")
-}
-
-general_splicer(data, "brno_zone", "zone")
-#brno_zone1
-#brno_zone2
-#brno_zone3
 ```
-```{r}
-# function to collect datasets with a specific prefix into a list
-collect_datasets_to_list <- function(prefix, suffix) {
-  # Get all objects in the global environment
-  all_objects <- ls(envir = .GlobalEnv)
-  
-  #ending may not need to be specified
-  if (suffix == "none"){
-  # Filter objects that start with the given prefix
-  dataset_names <- grep(paste0(prefix), all_objects, value = TRUE)
-  } else {
-    dataset_names <- grep(paste0(prefix, ".*", suffix), all_objects, value = TRUE)
-  }
-  # Create a named list of these datasets
-  dataset_list <- lapply(dataset_names, function(name) get(name, envir = .GlobalEnv))
-  names(dataset_list) <- dataset_names
-  
-  return(dataset_list)
-}
 
-# Example usage:
-# Assume datasets 'dataset_a', 'dataset_b', 'dataset_c' exist in the global environment
-zone_list <- collect_datasets_to_list("brno_zone", "none")
-
-
-names(zone_list)
-```
 ```{r}
 #divide dataset up by data + zone
-date_splicer <- function(dataset_names, column){
-  #iterate through each dataset
-  for (name in names(dataset_names)){
-    #collect the first part of old dataset name for new name
-    new_name <- paste0(substr(name, start = 6, stop = 10), "_")
-    #call splicing function to divide dataset and use new naming convention
-    general_splicer(dataset_names[[name]], new_name, column)
-  }
-}
-
-date_splicer(zone_list, "date")
-#put these into a datasetlist
-zone_date_list <- collect_datasets_to_list("zone", "2024")
+zone_date_list = dm.date_splicer(zone_list, "date")
 names(zone_date_list)
 ```
+
+
+
 ```{r}
+
+
+
 #divide dateset up into time + date + zone
 time_splicer <- function(dataset_names, column){
   #iterate through each dataset
