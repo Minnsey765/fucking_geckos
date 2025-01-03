@@ -24,7 +24,6 @@ dm.general_splicer <- function(data, name, column) {
     subset_collection[[subset_data_name]] <- subset_data
 
   }
-  print(length(subset_collection))
 
   message("Datasets created for each ", column, " value!")
   message("Empty datasets are not generated! (except for NA apparently)")
