@@ -161,13 +161,20 @@ dm.general_normaliser <- function(dataset_names, old_col, new_col){
 }
 
 #generate a rank column for data
-dm.ranker <- function(data, old_col, new_col, dataset_name){
+dm.ranker <- function(data, old_col, new_col, dataset_name,rank_type){
   #ensure column is numeric
   data[[old_col]] = as.numeric(data[[old_col]])
+  #find ranking system
+  if(!rank_type){
+    rank_coef <- 1
+  }
+  else{
+    rank_coef <- -1
+  }
   
   #rank the data in new column, ignoring NA
   normalised <- ifelse(!is.na(data[[old_col]]), 
-                       rank(-data[[old_col]], ties.method = "average"), 
+                       rank(rank_coef*data[[old_col]], ties.method = "average"), 
                        NA)
   #specify where new column is added
   
@@ -183,12 +190,12 @@ dm.ranker <- function(data, old_col, new_col, dataset_name){
 #fltr_zone1_12_n_e2
 
 #Loop this function for all datasets in a list
-dm.general_ranker <- function(dataset_names, old_col, new_col){
+dm.general_ranker <- function(dataset_names, old_col, new_col, rank_type){
   subset_collection <- list()
   #iterate through each dataset
   for (name in names(dataset_names)){
     #run normaliser function for the desired column
-    ranked_data <- dm.ranker(dataset_names[[name]], old_col, new_col, name)
+    ranked_data <- dm.ranker(dataset_names[[name]], old_col, new_col, name, rank_type)
     subset_collection[[name]] <- ranked_data
   }
   return(subset_collection)
