@@ -106,22 +106,35 @@ dm.data_filter <- function(dataset_names, column1, column2, val1, val2){
 #find the maximum value of a column and generate an adjacent column with the normalised data
 dm.normaliser <- function(data, old_col, new_col, dataset_name){
   #ensure column is numeric
+  
   data[[old_col]] = as.numeric(data[[old_col]])
-  
+  #ignore empty columns
+  if(length(data[[old_col]]) == 0){
+    return(NULL)
+  }
+  #check data entries exist
+  has_value <- FALSE %in% is.na(data[[old_col]])
   #find max value in column and exclude NA
-  max <- max(data[[old_col]], na.rm = TRUE)
-  
-  #deal with special case where 0 is max value (all entries must therefore be zero)
-  if(max == 0){
-    normalised <- (data[[old_col]] <- 1)
+  if(has_value == TRUE){
+    max <- max(data[[old_col]], na.rm = TRUE)
+    #deal with special case where 0 is max value (all entries must therefore be zero)
+    if(max == 0){
+      normalised <- (data[[old_col]] <- 1)
+    }
+    else{
+      #checks if value in column is na or not
+      isna_check <- is.na(data[[old_col]])
+      #normalise the data in new column, ignoring NA
+      normalised <- ifelse(isna_check,
+                           NA,data[[old_col]] / max)
+    }
   }
   else{
-    #checks if value in column is na or not
-    isna_check <- is.na(data[[old_col]])
-    #normalise the data in new column, ignoring NA
-    normalised <- ifelse(isna_check,
-                         NA,data[[old_col]] / max)
+    normalised <- (data[[old_col]] <- NA)
   }
+  
+  
+  
   #specify where new column is added
   
   #determine original column positon
@@ -139,8 +152,10 @@ dm.general_normaliser <- function(dataset_names, old_col, new_col){
   #iterate through each dataset
   for (name in names(dataset_names)){
     #run normaliser function for the desired column
-    normalised_data <- dm.normaliser(dataset_names[[name]], old_col, new_col, name)
-    subset_collection[[name]] <- normalised_data
+    if(length(dataset_names[[name]]) > 0){
+      normalised_data <- dm.normaliser(dataset_names[[name]], old_col, new_col, name)
+      subset_collection[[name]] <- normalised_data
+    }
   }
   return(subset_collection)
 }
