@@ -211,3 +211,15 @@ dm.event_time_compiler <- function(all_datasets, prefix, suffix, middle){
   return(filtered_datasets)
 
 }
+
+
+dm.smoosher <- function(datasets){
+  ds_names <- names(datasets)
+  columns <- colnames(datasets[[ds_names[1]]])
+  big_data <- data.frame(matrix(nrow=0,ncol=length(columns)))
+  colnames(big_data) = columns
+  for(name in names(datasets)){
+    big_data <- rbind(big_data,datasets[[name]])
+  }
+  return(big_data)
+}
