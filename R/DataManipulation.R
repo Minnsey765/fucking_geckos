@@ -111,10 +111,17 @@ dm.normaliser <- function(data, old_col, new_col, dataset_name){
   #find max value in column and exclude NA
   max <- max(data[[old_col]], na.rm = TRUE)
   
-  #normalise the data in new column, ignoring NA
-  normalised <- ifelse(!is.na(data[[old_col]]), 
-                       data[[old_col]] / max, 
-                       NA)
+  #deal with special case where 0 is max value (all entries must therefore be zero)
+  if(max == 0){
+    normalised <- (data[[old_col]] <- 1)
+  }
+  else{
+    #checks if value in column is na or not
+    isna_check <- is.na(data[[old_col]])
+    #normalise the data in new column, ignoring NA
+    normalised <- ifelse(isna_check,
+                         NA,data[[old_col]] / max)
+  }
   #specify where new column is added
   
   #determine original column positon
