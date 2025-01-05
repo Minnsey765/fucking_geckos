@@ -99,28 +99,32 @@ names(norm_fltr_event_list)
 ```
 
 ```{r}
+#define ranking system for each column
+# TRUE = highest value is lowest rank
+# FALSE = highest value is highest rank
+rank_system <-  c("rel_len"=TRUE, "rel_svl"=TRUE, "rel_wid"=TRUE, "rel_len_vol"=TRUE, "rel_svl_vol"=TRUE, "disp_light_cm"=FALSE, "dist_light_cm"=FALSE)
 
 
 #rank rel_len and add to large dataset
-ranked_norm_fltr_event_list <- dm.general_ranker(norm_fltr_event_list, "rel_len", "len_rank")
+ranked_norm_fltr_event_list <- dm.general_ranker(norm_fltr_event_list, "rel_len", "len_rank", rank_system["rel_len"])
 
 #repeat for rel_svl
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_svl", "svl_rank")
+ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_svl", "svl_rank", rank_system["rel_svl"])
 
 #repeat for rel_wid
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_wid", "wid_rank")
+ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_wid", "wid_rank", rank_system["rel_wid"])
 
 #repeat for rel_len_vol
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_len_vol", "len_vol_rank")
+ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_len_vol", "len_vol_rank", rank_system["rel_len_vol"])
 
 #repeat for rel_svl_vol
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_svl_vol", "svl_vol_rank")
+ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_svl_vol", "svl_vol_rank", rank_system["rel_svl_vol"])
 
 #repeat for rel_disp
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "disp_light_cm", "disp_rank")
+ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "disp_light_cm", "disp_rank", rank_system["disp_light_cm"])
 
 #repeat for rel_dist
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "dist_light_cm", "dist_rank")
+ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "dist_light_cm", "dist_rank", rank_system["dist_light_cm"])
 
 names(ranked_norm_fltr_event_list)
 
@@ -129,6 +133,15 @@ names(ranked_norm_fltr_event_list)
 ```{r}
 #check all updated datasets are present and correct in database
 ranked_norm_fltr_event_list
+```
+```{r}
+#reformat data into a big dataset and export to file as csv
+smooshed_data <- dm.smoosher(ranked_norm_fltr_event_list)
+write.csv(smooshed_data, "data/smooshed.csv")
+smooshed_data
+```
+```{r}
+dp.plotter(smooshed_data, "zone", "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,12), c(0,300), "Gecko size against displacement separated by zone")
 ```
 
 
@@ -154,57 +167,5 @@ fltr_event_afternoon_list
 
 ```{r}
 fltr_event_morning_list
-```
-
-```{r}
-
-#plot ranked svl vol against raw, relative, and ranked displacement and distance
-
-#displacement
-dp.mega_plotter(fltr_event_night_list, "svl_vol_rank", "disp_light_cm", "Ranked SVL volume", "Displacement from light source", 15, 300,"Ranked SVL volume against displacement", 'black')
-
-dp.mega_plotter(fltr_event_night_list, "svl_vol_rank", "rel_disp", "Ranked SVL volume", "Relative displacement from light source", 15, 1, "Ranked SVL volume against relative displacement", 'black')
-
-dp.mega_plotter(fltr_event_night_list, "svl_vol_rank", "disp_rank", "Ranked SVL volume", "Ranked displacement from light source", 15, 15, "Ranked SVL volume against ranked displacement", 'black')
-
-#distance
-dp.mega_plotter(fltr_event_night_list, "svl_vol_rank", "dist_light_cm", "Ranked SVL volume", "Distance from light source", 15, 300, "Ranked SVL volume against distance", 'black')
-
-dp.mega_plotter(fltr_event_night_list, "svl_vol_rank", "rel_dist", "Ranked SVL volume", "Relative distance from light source", 15, 1, "Ranked SVL volume against relative distance", 'black')
-
-dp.mega_plotter(fltr_event_night_list, "svl_vol_rank", "dist_rank", "Ranked SVL volume", "Ranked distance from light source", 15, 15, "Ranked SVL volume against ranked distance", 'black')
-```
-```{r}
-#relative SVL vol against raw, relative, ranked displacement and distance
-
-#displacement
-dp.mega_plotter(fltr_event_night_list, "rel_svl_vol", "disp_light_cm", "Relative SVL volume", "Displacement from light source", 1, 300,"Relative SVL volume against displacement", 'black')
-
-dp.mega_plotter(fltr_event_night_list, "rel_svl_vol", "rel_disp", "Relative SVL volume", "Relative displacement from light source", 1, 1, "Relative SVL volume against relative displacement", 'black')
-
-dp.mega_plotter(fltr_event_night_list, "rel_svl_vol", "disp_rank", "Relative SVL volume", "Ranked displacement from light source", 1, 15, "Relative SVL volume against ranked displacement", 'black')
-
-#distance
-dp.mega_plotter(fltr_event_night_list, "rel_svl_vol", "dist_light_cm", "Relative SVL volume", "Distance from light source", 1, 300, "Relative SVL volume against distance", 'black')
-
-dp.mega_plotter(fltr_event_night_list, "rel_svl_vol", "rel_dist", "Relative SVL volume", "Relative distance from light source", 1, 1, "Relative SVL volume against relative distance", 'black')
-
-dp.mega_plotter(fltr_event_night_list, "rel_svl_vol", "dist_rank", "Relative SVL volume", "Relative distance from light source", 1, 15, "Relative SVL volume against relative distance", 'black')
-
-```
-
-```{r}
-dp.multi_plotter(fltr_event_night_list, fltr_event_afternoon_list, fltr_event_afternoon_list, "svl_vol_rank", "disp_light_cm", "Ranked SVL volume", "Displacement from light source", 15, 300,"Ranked SVL volume against displacement", 'black', 'orange', 'blue')
-```
-
-```{r}
-
-
-dp.multi_plotter2(fltr_event_night_list, list(fltr_event_afternoon_list, fltr_event_morning_list), "svl_vol_rank", "disp_light_cm", "Ranked SVL volume", "Displacement from light source", 15, 300,"Ranked SVL volume against displacement", 'black', c('orange', 'blue'))
-```
-
-
-```{r}
-list(fltr_event_afternoon_list,fltr_event_morning_list)
 ```
 
