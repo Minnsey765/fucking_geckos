@@ -149,7 +149,7 @@ smooshed_data
 
 
 ```{r}
-dp.plotter(smooshed_data, NULL, "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,12), c(0,300), "Gecko size against displacement separated by zone")
+dp.plotter(smooshed_data, c("zone","quad_type"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,12), c(0,300), "Gecko size against displacement separated by")
 ```
 
 

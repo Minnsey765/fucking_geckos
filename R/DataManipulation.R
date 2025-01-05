@@ -233,7 +233,7 @@ dm.quad_type <- function(data, old_col, name){
   #change contents of new_col to 'expr' or 'ctrl'
   for(i in 1:length(new_col)){
     if(new_col[i] == "e"){
-      new_col[i] <- "expr"
+      new_col[i] <- "exp"
     }
     else{
       new_col[i] <- "ctrl"
