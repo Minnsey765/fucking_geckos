@@ -201,6 +201,7 @@ dm.general_ranker <- function(dataset_names, old_col, new_col, rank_type){
   return(subset_collection)
 }
 
+
 #grouping filtered events into new dataset list based on time of day
 dm.event_time_compiler <- function(all_datasets, prefix, suffix, middle){
   all_dataset_names <- names(all_datasets)
@@ -222,4 +223,27 @@ dm.smoosher <- function(datasets){
     big_data <- rbind(big_data,datasets[[name]])
   }
   return(big_data)
+}
+
+#add column next to quadrat with quadrat type as this makes analysis easier later on
+dm.quad_type <- function(data, old_col, name){
+  #generate new col of quadrat type (e or c)
+  new_col <- substr(data[[old_col]], 1,1)
+  
+  #change contents of new_col to 'expr' or 'ctrl'
+  for(i in 1:length(new_col)){
+    if(new_col[i] == "e"){
+      new_col[i] <- "expr"
+    }
+    else{
+      new_col[i] <- "ctrl"
+    }
+  }
+  #specify where new column is added
+  
+  #determine original column positon
+  original_position <- which(colnames(data) == old_col)
+  #insert new column
+  data <- cbind(data[, 1:original_position, drop = FALSE], setNames(data.frame(new_col), name), data[, (original_position + 1):ncol(data), drop = FALSE])
+  return(data)
 }

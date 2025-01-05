@@ -141,6 +141,14 @@ write.csv(smooshed_data, "data/smooshed.csv")
 smooshed_data
 ```
 ```{r}
+#add column of quadrat type + overwrite csv file
+smooshed_data <- dm.quad_type(smooshed_data, "quadrat", "quad_type")
+write.csv(smooshed_data, "data/smooshed.csv")
+smooshed_data
+```
+
+
+```{r}
 dp.plotter(smooshed_data, "zone", "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,12), c(0,300), "Gecko size against displacement separated by zone")
 ```
 
