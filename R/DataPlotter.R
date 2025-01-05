@@ -1,6 +1,18 @@
 ## ----simple, echo=TRUE-------------------------------
 
 dp.plotter <- function(data, column, xvar, yvar, xlab, ylab, xlim, ylim, title){
+  #determine whether categorize data
+  if(is.null(column)){
+    plot(data[[xvar]],data[[yvar]], xlab=xlab, ylab=ylab, xlim=xlim, ylim=ylim, main=title, col ='black',pch=19, cex=0.65)
+    lmodel <- lm(data[[yvar]] ~ data[[xvar]])
+    abline(a=data[[xvar]], b=data[[yvar]], col='black', lty=3, lwd=2)
+  }
+  else{
+    dp.cat_plotter(data, column, xvar, yvar, xlab, ylab, xlim, ylim, title)
+  }
+}
+
+dp.cat_plotter <- function(data, column, xvar, yvar, xlab, ylab, xlim, ylim, title){
   plot(0,0, xlab=xlab, ylab=ylab, xlim=xlim, ylim=ylim, main=title, col ='white')
   #find unique values in specified column
   unique_vals <- unique(data[[column]])
