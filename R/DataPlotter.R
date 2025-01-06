@@ -71,3 +71,12 @@ dp.cat_plotter <- function(data, categories, xvar, yvar, xlab, ylab, xlim, ylim,
   }
   legend(0.85*xlim[2],ylim[2], legend=human_uniq, col=pal, lty=3, lwd=3, cex=0.8)
 }
+
+#boxplot for comparing gecko size in experimental and control quadrats
+dp.boxplot <- function(data, con_var, dis_var, title, xlab, ylab){
+  #find unique values in discrete variable column
+  unique_vals <- unique(data[[dis_var]])
+  #plot box plot
+  box_plot <- boxplot(data[[con_var]]~data[[dis_var]], main=title, cex.main=1, names=unique_vals, xlab = xlab, ylab=paste(ylab,con_var))
+  return(boxplot)
+}

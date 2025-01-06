@@ -29,11 +29,14 @@ outrm_data <- dm.outliar.rm(data_raw, c("length_cm","svl_cm","disp_light_cm", "d
 outrm_data
 ```
 ```{r}
+#split datasets up into separate dataframes but still contained within a list
 zone_list = dm.general_splicer(data_raw, "brno_zone", "zone")
 print(names(zone_list))
 #print(brno_zones[["brno_zone1"]])
 
+#repeat for data excluding outliars
 outrm_zone_list <- dm.general_splicer(outrm_data, "brno_zone", "zone")
+print(names(outrm_zone_list))
 ```
 
 ```{r}
@@ -41,30 +44,32 @@ outrm_zone_list <- dm.general_splicer(outrm_data, "brno_zone", "zone")
 zone_date_list = dm.date_splicer(zone_list, "date")
 names(zone_date_list)
 
-# optionally remove if no longer needed?
-# rm(zone_list)
+#repeat for outliar-removed data
+outrm_zone_date_list <- dm.date_splicer(outrm_zone_list, "date")
+names(outrm_zone_date_list)
 ```
 
 
 
 ```{r}
-
+#split via time + date + zone
 zone_date_time_list <- dm.time_splicer(zone_date_list, "time")
-
-#generate datasetlist
-#this specifies that the suffix that should be at the end of new datasets is 2 digits an underscore and a letter "XX_a"
-#zone_date_time_list <- collect_datasets_to_list("zone", "_\\d{2}_[a-zA-Z]$")
 names(zone_date_time_list)
+
+#repeat for outliar-removed data
+outrm_zone_date_time_list <- dm.time_splicer(outrm_zone_date_list, "time")
+names(outrm_zone_date_time_list)
 ```
 
 ```{r}
-
+#split data up into list of dataframes for each event
 
 event_list <- dm.event_splicer(zone_date_time_list, "quadrat")
-
-#make dataset list of all events
-#event_list <- collect_datasets_to_list("zone", "_\\d{2}_[a-zA-Z]_[a-zA-Z]\\d{1,2}$")
 names(event_list)
+
+#repeat for outliar-removed data
+outrm_event_list <- dm.event_splicer(outrm_zone_date_time_list, "quadrat")
+names(outrm_event_list)
 ```
 
 
@@ -73,6 +78,10 @@ names(event_list)
 #create filtered event datasets
 fltr_event_list <- dm.data_filter(event_list, "gecko_present", "bad_img_qua", 0, 1)
 names(fltr_event_list)
+
+#repeat for outliar-removed data
+outrm_fltr_event_list <- dm.data_filter(outrm_event_list, "gecko_present", "bad_img_qua", 0, 1)
+names(outrm_fltr_event_list)
 ```
 
 ```{r}
@@ -84,21 +93,32 @@ rank_system <-  c("rel_len"=TRUE, "rel_svl"=TRUE, "rel_wid"=TRUE, "rel_len_vol"=
 #rank and normalise data simultaneously
 ranked_norm_fltr_event_list <- dm.norm_ranker(fltr_event_list, rank_system)
 
-```
-
-```{r}
 #check all updated datasets are present and correct in database
 names(ranked_norm_fltr_event_list)
 ranked_norm_fltr_event_list
 ```
+
+```{r}
+#repeat for filtered outliar-removed data
+outrm_ranked_norm_fltr_event_list <- dm.norm_ranker(outrm_fltr_event_list, rank_system)
+
+#check all updated datasets are present and correct in database
+names(outrm_ranked_norm_fltr_event_list)
+outrm_ranked_norm_fltr_event_list
+```
 ```{r}
 #normalise and rank unfiltered data using same process
 ranked_norm_unfltr_event_list <- dm.norm_ranker(event_list, rank_system)
-```
-```{r}
+
 #check all updated datasets are present and correct in database
 names(ranked_norm_unfltr_event_list)
 ranked_norm_unfltr_event_list
+```
+```{r}
+#repeat for unfiltered outliar-removed data
+outrm_ranked_norm_unfltr_event_list <- dm.norm_ranker(outrm_event_list, rank_system)
+names(outrm_ranked_norm_unfltr_event_list)
+outrm_ranked_norm_unfltr_event_list
 ```
 
 ```{r}
@@ -113,6 +133,16 @@ smooshed_data
 unfltr_smooshed_data <- dm.smoosher(ranked_norm_unfltr_event_list)
 write.csv(unfltr_smooshed_data, "data/unfltr_smooshed_data.csv")
 unfltr_smooshed_data
+
+#do for filtered outliar-removed datasets
+outrm_smooshed_data <- dm.smoosher(outrm_ranked_norm_fltr_event_list)
+write.csv(outrm_smooshed_data, "data/outrm_smooshed_data.csv")
+outrm_smooshed_data
+
+#do for unfiltered outliar-removed datasets
+outrm_unfltr_smooshed_data <- dm.smoosher(outrm_ranked_norm_unfltr_event_list)
+write.csv(outrm_unfltr_smooshed_data, "data/outrm_unfltr_smooshed_data.csv")
+outrm_unfltr_smooshed_data
 ```
 ```{r}
 #add column of quadrat type + overwrite csv file
@@ -124,23 +154,53 @@ smooshed_data
 unfltr_smooshed_data <- dm.quad_type(unfltr_smooshed_data, "quadrat", "quad_type")
 write.csv(unfltr_smooshed_data, "data/unfltr_smooshed.csv")
 unfltr_smooshed_data
-```
-```{r}
-#refilter the data for outliars
 
-#dm.outliar(smooshed_data, "svl_cm")
-dm.outliar.rm(smooshed_data, c("length_cm","svl_cm","disp_light_cm", "dist_light_cm"))
+#repeat for filtered outliar-removed data
+outrm_smooshed_data <- dm.quad_type(outrm_smooshed_data, "quadrat", "quad_type")
+write.csv(outrm_smooshed_data, "data/outrm_smooshed_data.csv")
+outrm_smooshed_data
 
+#repeat for unfiltered outliar-removed data
+outrm_unfltr_smooshed_data <- dm.quad_type(outrm_unfltr_smooshed_data, "quadrat", "quad_type")
+write.csv(outrm_unfltr_smooshed_data,"data/outrm_unfltr_smooshed_data.csv")
+outrm_unfltr_smooshed_data
 ```
+
 ```{r}
+#plot for filtered data
+dp.boxplot(smooshed_data, "length_cm", "quad_type","Comparison of size between geckos in different quadrats", "Quadrat type experimental or control", "Gecko")
+
 dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against displacement separated by")
 
 dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,450), "Gecko size against distance separated by")
 ```
 ```{r}
+#plot for unfiltered data
+dp.boxplot(unfltr_smooshed_data, "length_cm", "quad_type","Comparison of size between geckos in different quadrats", "Quadrat type experimental or control", "Gecko")
+
 dp.plotter(unfltr_smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against displacement separated by")
 
 dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,450), "Gecko size against distance separated by")
 ```
+```{r}
+#plot for filtered outliar_removed data
+dp.boxplot(outrm_smooshed_data, "length_cm", "quad_type","Comparison of size between geckos in different quadrats", "Quadrat type experimental or control", "Gecko")
+
+dp.plotter(outrm_smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,270), "Gecko size against displacement separated by")
+
+dp.plotter(outrm_smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,300), "Gecko size against distance separated by")
+```
+```{r}
+#plot for filtered outliar_removed data
+dp.boxplot(outrm_unfltr_smooshed_data, "length_cm", "quad_type","Comparison of size between geckos in different quadrats", "Quadrat type experimental or control", "Gecko")
+
+dp.plotter(outrm_unfltr_smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,270), "Gecko size against displacement separated by")
+
+dp.plotter(outrm_unfltr_smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,300), "Gecko size against distance separated by")
+```
+```{r}
+
+```
+
 
 
