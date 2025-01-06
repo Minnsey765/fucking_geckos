@@ -160,6 +160,7 @@ dm.general_normaliser <- function(dataset_names, old_col, new_col){
   return(subset_collection)
 }
 
+
 #generate a rank column for data
 dm.ranker <- function(data, old_col, new_col, dataset_name,rank_type){
   #ensure column is numeric
@@ -201,16 +202,53 @@ dm.general_ranker <- function(dataset_names, old_col, new_col, rank_type){
   return(subset_collection)
 }
 
-
-#grouping filtered events into new dataset list based on time of day
-dm.event_time_compiler <- function(all_datasets, prefix, suffix, middle){
-  all_dataset_names <- names(all_datasets)
+#input dataset list and ranking system and normalise + rank all appropriate columns
+dm.norm_ranker <- function(datasets, rank_sys){
+  #normalise first
+  #normalise for length_cm and add to large dataset
+  norm_list <- dm.general_normaliser(datasets, "length_cm", "rel_len")
   
-  name_filter <- paste0(prefix, middle, suffix)
-  filtered_datasets <- all_datasets[grep(name_filter, names(all_datasets))]  
-
-  return(filtered_datasets)
-
+  #repeat for svl_cm
+  norm_list <- dm.general_normaliser(norm_list, "svl_cm", "rel_svl")
+  
+  #repeat for width_cm
+  norm_list <- dm.general_normaliser(norm_list, "width_cm", "rel_wid")
+  
+  #repeat for len_vol_cm3
+  norm_list <- dm.general_normaliser(norm_list, "len_vol_cm3", "rel_len_vol")
+  
+  #repeat for svl_vol_cm3
+  norm_list <- dm.general_normaliser(norm_list, "svl_vol_cm3", "rel_svl_vol")
+  
+  #repeat for disp_light_cm
+  norm_list <- dm.general_normaliser(norm_list, "disp_light_cm", "rel_disp")
+  
+  #repeat for dist_light_cm
+  norm_list <- dm.general_normaliser(norm_list, "dist_light_cm", "rel_dist")
+  
+  #rank second
+  #rank rel_len and add to large dataset
+  norm_list <- dm.general_ranker(norm_list, "rel_len", "len_rank", rank_sys["rel_len"])
+  
+  #repeat for rel_svl
+  norm_list <- dm.general_ranker(norm_list, "rel_svl", "svl_rank", rank_sys["rel_svl"])
+  
+  #repeat for rel_wid
+  norm_list <- dm.general_ranker(norm_list, "rel_wid", "wid_rank", rank_sys["rel_wid"])
+  
+  #repeat for rel_len_vol
+  norm_list <- dm.general_ranker(norm_list, "rel_len_vol", "len_vol_rank", rank_sys["rel_len_vol"])
+  
+  #repeat for rel_svl_vol
+  norm_list <- dm.general_ranker(norm_list, "rel_svl_vol", "svl_vol_rank", rank_sys["rel_svl_vol"])
+  
+  #repeat for rel_disp
+  norm_list <- dm.general_ranker(norm_list, "disp_light_cm", "disp_rank", rank_sys["disp_light_cm"])
+  
+  #repeat for rel_dist
+  norm_list <- dm.general_ranker(norm_list, "dist_light_cm", "dist_rank", rank_sys["dist_light_cm"])
+  
+  return(norm_list)
 }
 
 

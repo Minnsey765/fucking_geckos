@@ -71,109 +71,67 @@ fltr_event_list <- dm.data_filter(event_list, "gecko_present", "bad_img_qua", 0,
 names(fltr_event_list)
 ```
 
-
-```{r}
-
-#normalise for length_cm and add to large dataset
-norm_fltr_event_list <- dm.general_normaliser(fltr_event_list, "length_cm", "rel_len")
-
-#repeat for svl_cm
-norm_fltr_event_list <- dm.general_normaliser(norm_fltr_event_list, "svl_cm", "rel_svl")
-
-#repeat for width_cm
-norm_fltr_event_list <- dm.general_normaliser(norm_fltr_event_list, "width_cm", "rel_wid")
-
-#repeat for len_vol_cm3
-norm_fltr_event_list <- dm.general_normaliser(norm_fltr_event_list, "len_vol_cm3", "rel_len_vol")
-
-#repeat for svl_vol_cm3
-norm_fltr_event_list <- dm.general_normaliser(norm_fltr_event_list, "svl_vol_cm3", "rel_svl_vol")
-
-#repeat for disp_light_cm
-norm_fltr_event_list <- dm.general_normaliser(norm_fltr_event_list, "disp_light_cm", "rel_disp")
-
-#repeat for dist_light_cm
-norm_fltr_event_list <- dm.general_normaliser(norm_fltr_event_list, "dist_light_cm", "rel_dist")
-
-names(norm_fltr_event_list)
-```
-
 ```{r}
 #define ranking system for each column
 # TRUE = highest value is lowest rank
 # FALSE = highest value is highest rank
 rank_system <-  c("rel_len"=TRUE, "rel_svl"=TRUE, "rel_wid"=TRUE, "rel_len_vol"=TRUE, "rel_svl_vol"=TRUE, "disp_light_cm"=FALSE, "dist_light_cm"=FALSE)
 
-
-#rank rel_len and add to large dataset
-ranked_norm_fltr_event_list <- dm.general_ranker(norm_fltr_event_list, "rel_len", "len_rank", rank_system["rel_len"])
-
-#repeat for rel_svl
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_svl", "svl_rank", rank_system["rel_svl"])
-
-#repeat for rel_wid
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_wid", "wid_rank", rank_system["rel_wid"])
-
-#repeat for rel_len_vol
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_len_vol", "len_vol_rank", rank_system["rel_len_vol"])
-
-#repeat for rel_svl_vol
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "rel_svl_vol", "svl_vol_rank", rank_system["rel_svl_vol"])
-
-#repeat for rel_disp
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "disp_light_cm", "disp_rank", rank_system["disp_light_cm"])
-
-#repeat for rel_dist
-ranked_norm_fltr_event_list <- dm.general_ranker(ranked_norm_fltr_event_list, "dist_light_cm", "dist_rank", rank_system["dist_light_cm"])
-
-names(ranked_norm_fltr_event_list)
+#rank and normalise data simultaneously
+ranked_norm_fltr_event_list <- dm.norm_ranker(fltr_event_list, rank_system)
 
 ```
 
 ```{r}
 #check all updated datasets are present and correct in database
+names(ranked_norm_fltr_event_list)
 ranked_norm_fltr_event_list
 ```
 ```{r}
+#normalise and rank unfiltered data using same process
+ranked_norm_unfltr_event_list <- dm.norm_ranker(event_list, rank_system)
+```
+```{r}
+#check all updated datasets are present and correct in database
+names(ranked_norm_unfltr_event_list)
+ranked_norm_unfltr_event_list
+```
+
+```{r}
 #reformat data into a big dataset and export to file as csv
+
+#do for filtered datasets
 smooshed_data <- dm.smoosher(ranked_norm_fltr_event_list)
 write.csv(smooshed_data, "data/smooshed.csv")
 smooshed_data
+
+#do for unfiltered datasets
+unfltr_smooshed_data <- dm.smoosher(ranked_norm_unfltr_event_list)
+write.csv(unfltr_smooshed_data, "data/unfltr_smooshed_data.csv")
+unfltr_smooshed_data
 ```
 ```{r}
 #add column of quadrat type + overwrite csv file
 smooshed_data <- dm.quad_type(smooshed_data, "quadrat", "quad_type")
 write.csv(smooshed_data, "data/smooshed.csv")
 smooshed_data
+
+#repeat for unfiltered data
+unfltr_smooshed_data <- dm.quad_type(unfltr_smooshed_data, "quadrat", "quad_type")
+write.csv(unfltr_smooshed_data, "data/unfltr_smooshed.csv")
+unfltr_smooshed_data
 ```
 
 
 ```{r}
-dp.plotter(smooshed_data, c("zone","quad_type"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,12), c(0,300), "Gecko size against displacement separated by")
-```
+dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against displacement separated by")
 
-
-```{r}
-
-#make list for all night events
-fltr_event_night_list <- dm.event_time_compiler(ranked_norm_fltr_event_list, "fltr_zone\\d_\\d{2}_", "_[a-z]\\d{1,2}", "n")
-
-#make list for all afternoon events
-fltr_event_afternoon_list <- dm.event_time_compiler(ranked_norm_fltr_event_list,"fltr_zone\\d_\\d{2}_", "_[a-z]\\d{1,2}", "a")
-
-#make list for all morning events
-fltr_event_morning_list <- dm.event_time_compiler(ranked_norm_fltr_event_list,"fltr_zone\\d_\\d{2}_", "_[a-z]\\d{1,2}", "m")
+dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,450), "Gecko size against distance separated by")
 ```
 ```{r}
-fltr_event_night_list
+dp.plotter(unfltr_smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against displacement separated by")
+
+dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,450), "Gecko size against distance separated by")
 ```
 
-
-```{r}
-fltr_event_afternoon_list
-```
-
-```{r}
-fltr_event_morning_list
-```
 
