@@ -285,3 +285,63 @@ dm.quad_type <- function(data, old_col, name){
   data <- cbind(data[, 1:original_position, drop = FALSE], setNames(data.frame(new_col), name), data[, (original_position + 1):ncol(data), drop = FALSE])
   return(data)
 }
+
+
+#remove outliars from big dataset
+dm.outliar <- function(data, column){
+  #summary object contains all relevant information
+  summary <- summary(as.numeric(data[[column]]))
+  #use 1.5*IQR as outliar determination
+  IQR <- summary[[5]] - summary[[2]]
+  u_limit <- summary[[5]] + 1.5*IQR
+  l_limit <- summary[[2]] - 1.5*IQR
+  #filter the data greater than 1.5*IQR above 3rd quartile into a vector
+  filtered <- replace(as.numeric(data[[column]]), as.numeric(data[[column]]) > u_limit, NA)
+  #filter the data less than 1.5*IQR below 1st quartile
+  filtered <- replace(filtered, filtered < l_limit, NA)
+  
+  #replace new vector where old column was
+  data[[column]] <- filtered
+  return(data)
+}
+
+#replace any values that require length_cm or svl_cm with NA if they have been removed
+dm.replacer <- function(data, column){
+  #initalise target column
+  target_col = ""
+  #specify target column based on input column
+  if(column == "length_cm"){
+    target_col <- "len_vol_cm3"
+    #locate index of values with NA
+    index <- which(is.na(data[[column]]))
+    #replace values in target column with this index with NA
+    for(i in index){
+      data[[target_col]][i] <- NA
+    }
+  }
+  else if(column == "svl_cm"){
+    target_col <- "svl_vol_cm3"
+    #locate index of values with NA
+    index <- which(is.na(data[[column]]))
+    #replace values in target column with this index with NA
+    for(i in index){
+      data[[target_col]][i] <- NA
+    }
+  }
+  
+  return(data)
+}
+
+#mass remove outliars combining above functions
+dm.outliar.rm <- function(data, columns){
+  #initialise filtered data as data
+  filtered_data <- data
+  #loop through and remove outliars from each column and overwrite dataset
+  for(column in columns){
+    #remove outliars from relevant main columns
+    filtered_data <- dm.outliar(filtered_data, column)
+    #remove outliars from columns dependent on main columns
+    filtered_data <- dm.replacer(filtered_data, column)
+  }
+  return(filtered_data)
+}

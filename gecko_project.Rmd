@@ -23,13 +23,17 @@ source("R/DataPlotter.R")
 data_raw <-read.csv("data-raw/brno_gecko_dist_data.csv")
 print(data_raw)
 ```
-
-
+```{r}
+#make new dataset that has outliars removed in lowest error columns (length_cm, svl_cm, disp_light_cm, dist_light_cm)
+outrm_data <- dm.outliar.rm(data_raw, c("length_cm","svl_cm","disp_light_cm", "dist_light_cm"))
+outrm_data
+```
 ```{r}
 zone_list = dm.general_splicer(data_raw, "brno_zone", "zone")
 print(names(zone_list))
 #print(brno_zones[["brno_zone1"]])
 
+outrm_zone_list <- dm.general_splicer(outrm_data, "brno_zone", "zone")
 ```
 
 ```{r}
@@ -121,8 +125,13 @@ unfltr_smooshed_data <- dm.quad_type(unfltr_smooshed_data, "quadrat", "quad_type
 write.csv(unfltr_smooshed_data, "data/unfltr_smooshed.csv")
 unfltr_smooshed_data
 ```
+```{r}
+#refilter the data for outliars
 
+#dm.outliar(smooshed_data, "svl_cm")
+dm.outliar.rm(smooshed_data, c("length_cm","svl_cm","disp_light_cm", "dist_light_cm"))
 
+```
 ```{r}
 dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against displacement separated by")
 
