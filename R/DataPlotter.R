@@ -76,7 +76,23 @@ dp.cat_plotter <- function(data, categories, xvar, yvar, xlab, ylab, xlim, ylim,
 dp.boxplot <- function(data, con_var, dis_var, title, xlab, ylab){
   #find unique values in discrete variable column
   unique_vals <- unique(data[[dis_var]])
+  #print(cbind(data[[con_var]],data[[dis_var]]))
   #plot box plot
   box_plot <- boxplot(data[[con_var]]~data[[dis_var]], main=title, cex.main=1, names=unique_vals, xlab = xlab, ylab=paste(ylab,con_var))
   return(boxplot)
+}
+
+# t test function
+dp.t_test <- function(data, con_var, dis_var){
+  t_test <- t.test(data[[con_var]] ~ data[[dis_var]], data)
+  result <- ""
+  if(t_test$p.value > 0.05){
+    result <- "no"
+  }
+  else{
+    result <- "a significant"
+  }
+  print(t_test)
+  sentence <- paste("There is ", result, " difference between each treatment. (p value =", t_test$p.value, ")")
+  return(sentence)
 }

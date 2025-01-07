@@ -345,3 +345,11 @@ dm.outliar.rm <- function(data, columns){
   }
   return(filtered_data)
 }
+
+#function or raw_data2 that converts all numeric values to numeric data and nas to NAs
+dm.cleaner <- function(data,columns){
+  for(column in columns){
+    data[[column]] <- as.numeric(data[[column]])
+  }
+  return(data)
+}
