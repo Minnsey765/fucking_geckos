@@ -225,11 +225,16 @@ dp.plotter(outrm_unfltr_smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm
 #vector of column names
 abd_colnam <- c("light_int","rli","temp","h_gecko","f_gecko","gek_num","gek_photo","lepid_t","lepid_s","lepid_m","lepid_l","hymen_t",	"hymen_s",	"hymen_m",	"hymen_l",	"hemip_t",	"hemip_s",	"hemip_m",	"hemip_l",	"coleo_t",	"coleo_s",	"coleo_m",	"coleo_l",	"ortho_t",	"ortho_s",	"ortho_m",	"ortho_l",	"odon_t",	"odon_s",	"odon_m",	"odon_l",	"dipt_t",	"dipt_s",	"dipt_m",	"dipt_l",	"other_t",	"other_s",	"other_m",	"other_l",	"arach_t",	"arach_s",	"arach_m",	"arach_l") 
 clean_abd_data <- dm.cleaner(data_raw2, abd_colnam)
+
+#add a column with logorithms of relative light intesnity
+clean_abd_data <- dm.log_col(clean_abd_data, "light_int", "log_light")
+write.csv(clean_abd_data, "data/clean_abd_data.csv")
 clean_abd_data
 ```
 ```{r}
 # Abundance data analysis
-dp.plotter(clean_abd_data, c("time"), "rli", "gek_num", "Light intensity of quadrat relative to ambient", "Gecko abundance in quadrat", c(0,50), c(0,10), "Gecko abundance separated by")
+print(max(clean_abd_data$rli, na.rm=TRUE))
+dp.plotter(clean_abd_data, c("time"), "log_light", "gek_num", "Log light intensity of quadrat relative to ambient", "Gecko abundance in quadrat", c(0,9), c(0,10), "Gecko abundance separated by")
 ```
 
 

@@ -353,3 +353,26 @@ dm.cleaner <- function(data,columns){
   }
   return(data)
 }
+
+#function to take and add a column with logorithms of a column
+dm.log_col <- function(data, column, name){
+  #make vector of logorithmed data
+  options(digits=10)
+  new_col <- as.numeric(data[[column]])
+  new_col <- log(new_col)
+  #change -Inf values to -1
+  for(i in 1:length(new_col)){
+    #NA conditon must come first for some reason
+    if(is.na(new_col[i])){
+      new_col[i] <- NA
+    }
+    else if(new_col[i]=="-Inf"){
+      new_col[i] <- -1
+    }
+  }
+  #determine original column positon
+  original_position <- which(colnames(data) == column)
+  #insert new column
+  data <- cbind(data[, 1:original_position, drop = FALSE], setNames(data.frame(new_col), name), data[, (original_position + 1):ncol(data), drop = FALSE])
+  return(data)
+}
