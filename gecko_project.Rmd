@@ -17,6 +17,11 @@ source("R/DataManipulation.R")
 source("R/DataPlotter.R")
 ```
 
+```{r}
+#install packages
+install.packages("factoextra")
+library(factoextra)
+```
 
 ```{r}
 #set working directory and read in data
@@ -178,7 +183,7 @@ print("__________________________________________________________")
 print("Formal test for significance between control and experimental geckos")
 dp.t_test(smooshed_data, "svl_vol_cm3", "quad_type")
 
-dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against displacement separated by")
+dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "SVL /cm3", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against displacement separated by")
 
 dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,450), "Gecko size against distance separated by")
 ```
@@ -226,16 +231,26 @@ dp.plotter(outrm_unfltr_smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm
 abd_colnam <- c("light_int","rli","temp","h_gecko","f_gecko","gek_num","gek_photo","lepid_t","lepid_s","lepid_m","lepid_l","hymen_t",	"hymen_s",	"hymen_m",	"hymen_l",	"hemip_t",	"hemip_s",	"hemip_m",	"hemip_l",	"coleo_t",	"coleo_s",	"coleo_m",	"coleo_l",	"ortho_t",	"ortho_s",	"ortho_m",	"ortho_l",	"odon_t",	"odon_s",	"odon_m",	"odon_l",	"dipt_t",	"dipt_s",	"dipt_m",	"dipt_l",	"other_t",	"other_s",	"other_m",	"other_l",	"arach_t",	"arach_s",	"arach_m",	"arach_l") 
 clean_abd_data <- dm.cleaner(data_raw2, abd_colnam)
 
-#add a column with logorithms of relative light intesnity
+#add a column with logorithms of light intesnity
 clean_abd_data <- dm.log_col(clean_abd_data, "light_int", "log_light")
+#add a column with logorithms of rli
+clean_abd_data <- dm.log_col(clean_abd_data, "rli", "log_rli")
 write.csv(clean_abd_data, "data/clean_abd_data.csv")
 clean_abd_data
 ```
 ```{r}
 # Abundance data analysis
-print(max(clean_abd_data$rli, na.rm=TRUE))
-dp.plotter(clean_abd_data, c("time"), "log_light", "gek_num", "Log light intensity of quadrat relative to ambient", "Gecko abundance in quadrat", c(0,9), c(0,10), "Gecko abundance separated by")
+#dp.plotter(clean_abd_data, c("time"), "log_light", "gek_num", "Log light intensity of quadrat", "Gecko abundance in quadrat", c(0,9), c(0,10), "Gecko abundance separated by")
+
+#plot clustering plot for comparison
+#dp.kmeans(clean_abd_data, "log_light", "gek_num", 2)
+
+#dp.plotter(clean_abd_data, c("time"), "log_rli", "gek_num", "Log of relative to ambient light intensity of quadrat", "Gecko abundance in quadrat", c(-5,6), c(0,10), "Gecko abundance separated by")
+
+#plot clustering plot for comparison
+#dp.kmeans(clean_abd_data, "log_rli", "gek_num", 2)
 ```
+
 
 
 

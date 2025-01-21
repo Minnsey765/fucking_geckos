@@ -5,7 +5,7 @@ dp.plotter <- function(data, categories, xvar, yvar, xlab, ylab, xlim, ylim, tit
   if(is.null(categories)){
     plot(data[[xvar]],data[[yvar]], xlab=xlab, ylab=ylab, xlim=xlim, ylim=ylim, main=title, col ='black',pch=19, cex=0.65)
     lmodel <- lm(data[[yvar]] ~ data[[xvar]])
-    abline(a=data[[xvar]], b=data[[yvar]], col='black', lty=3, lwd=2)
+    abline(a=coef(lmodel)[1], b=coef(lmodel)[2], col='black', lty=3, lwd=2)
   }
   else{
     dp.cat_plotter(data, categories, xvar, yvar, xlab, ylab, xlim, ylim, title)
@@ -69,7 +69,7 @@ dp.cat_plotter <- function(data, categories, xvar, yvar, xlab, ylab, xlim, ylim,
     #increment colour
     i <- i +1
   }
-  legend(0.85*xlim[2],ylim[2], legend=human_uniq, col=pal, lty=3, lwd=3, cex=0.8)
+  legend(0.8*xlim[2],ylim[2], legend=human_uniq, col=pal, lty=3, lwd=3, cex=0.8)
 }
 
 #boxplot for comparing gecko size in experimental and control quadrats
@@ -96,3 +96,25 @@ dp.t_test <- function(data, con_var, dis_var){
   sentence <- paste("There is ", result, " difference between each treatment. (p value =", t_test$p.value, ")")
   return(sentence)
 }
+
+#dp.kmeans <- function(data, xvar, yvar, clusters){
+  #generate palette of correct number of colours
+#  col_pal <- palette(rainbow(clusters))
+  #create column names
+#  names <- c(xvar,yvar)
+  #create new vector matrix for kmeans analysis and remove NAs
+#  dataframe <- na.omit(cbind(data[[xvar]],data[[yvar]]))
+#  km.rs <- kmeans(dataframe, clusters, iter.max = 10, nstart = 1)
+  
+  #convert dataframe into actual dataframe and name columns
+#  dataframe <- as.data.frame(dataframe)
+#  colnames(dataframe) <- names
+  #plot cluster
+#  plot <- fviz_cluster(km.rs, data = dataframe,
+#               palette = col_pal, 
+#               geom = "point",
+#               ellipse.type = "convex", 
+#               ggtheme = theme_bw()
+#  )
+#  return(plot)
+#}
