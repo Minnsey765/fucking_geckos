@@ -19,7 +19,7 @@ source("R/DataPlotter.R")
 
 ```{r}
 #install packages
-install.packages("factoextra")
+#install.packages("factoextra")
 library(factoextra)
 ```
 
@@ -240,15 +240,32 @@ clean_abd_data
 ```
 ```{r}
 # Abundance data analysis
-#dp.plotter(clean_abd_data, c("time"), "log_light", "gek_num", "Log light intensity of quadrat", "Gecko abundance in quadrat", c(0,9), c(0,10), "Gecko abundance separated by")
+dp.plotter(clean_abd_data, c("time"), "log_light", "gek_num", "Log light intensity of quadrat", "Gecko abundance in quadrat", c(0,9), c(0,10), "Gecko abundance separated by")
 
 #plot clustering plot for comparison
 #dp.kmeans(clean_abd_data, "log_light", "gek_num", 2)
 
-#dp.plotter(clean_abd_data, c("time"), "log_rli", "gek_num", "Log of relative to ambient light intensity of quadrat", "Gecko abundance in quadrat", c(-5,6), c(0,10), "Gecko abundance separated by")
+dp.plotter(clean_abd_data, c("time"), "log_rli", "gek_num", "Log of relative to ambient light intensity of quadrat", "Gecko abundance in quadrat", c(-5,6), c(0,10), "Gecko abundance separated by")
 
 #plot clustering plot for comparison
 #dp.kmeans(clean_abd_data, "log_rli", "gek_num", 2)
+```
+```{r}
+#generate a name set of columns to be iterated through and summarized
+insect_nameset <- dm.insect_dataframe(c("lepid_t","lepid_s","lepid_m","lepid_l","hymen_t",	"hymen_s",	"hymen_m",	"hymen_l",	"hemip_t",	"hemip_s",	"hemip_m",	"hemip_l",	"coleo_t",	"coleo_s",	"coleo_m",	"coleo_l",	"ortho_t",	"ortho_s",	"ortho_m",	"ortho_l",	"odon_t",	"odon_s",	"odon_m",	"odon_l",	"dipt_t",	"dipt_s",	"dipt_m",	"dipt_l",	"other_t",	"other_s",	"other_m",	"other_l",	"arach_t",	"arach_s",	"arach_m",	"arach_l"),c("insect_total","lepid_total","hymen_total","hemip_total","coleo_total","ortho_total", "odon_total", "dipt_total", "other_total", "arach_total"))
+insect_nameset
+#dm.insect_addition(clean_abd_data, "gek_num", c("lepid_t","lepid_s","lepid_m","lepid_l"), "total_lepid")
+```
+```{r}
+#summarize all insect abundance columns
+clean_abd_data <- dm.insect_summary(clean_abd_data, "gek_num", insect_nameset)
+clean_abd_data
+#write to csv
+write.csv(clean_abd_data, "data/clean_abd_data.csv")
+clean_abd_data
+```
+```{r}
+dp.plotter(clean_abd_data, NULL, "insect_total", "gek_num", "Insect abundance around light", "Gecko abundance in quadrat", c(0,40), c(0,10), "Gecko abundance against insect abundance")
 ```
 
 

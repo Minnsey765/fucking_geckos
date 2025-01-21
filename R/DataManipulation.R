@@ -376,3 +376,62 @@ dm.log_col <- function(data, column, name){
   data <- cbind(data[, 1:original_position, drop = FALSE], setNames(data.frame(new_col), name), data[, (original_position + 1):ncol(data), drop = FALSE])
   return(data)
 }
+
+#add columns with totals of numbers of insects
+dm.insect_addition <- function(data, main_col, target_cols, new_col){
+  #remove NAs from target cols
+  target_cols <- na.omit(target_cols)
+  #initalise new vector
+  vector <- vector(mode="numeric",length=length(data[[main_col]]))
+  #iterate through and generate total for each index of vector and assign
+  for(i in 1:length(vector)){
+    #initialise sum
+    sum <- 0
+    #generate sum iteratively across target colunns
+    for(j in 1:length(target_cols)){
+      #add value in i th row of j th column in dataframe
+      sum <- sum + data[[target_cols[j]]][i]
+    }
+    #set i th row of new vector as sum
+    vector[i] <- sum
+  }
+  #bind new column to original dataset infront of first column
+  original_position <- which(colnames(data) == target_cols[1])
+  data <- cbind(data[, 1:original_position -1, drop = FALSE], setNames(data.frame(vector), new_col), data[, original_position:ncol(data), drop = FALSE])
+  return(data)
+}
+
+#collate all columns to be summarised into a dataframe
+dm.insect_dataframe <- function(old_col_names, new_col_names){
+  #initialise dataframe
+  dataframe <- as.data.frame(old_col_names)
+  #set name to first new_col_name
+  colnames(dataframe) <- new_col_names[1]
+  #first vector is biggest
+  max_length <- length(old_col_names)
+  #iterate through and bind new columns with appropriate information 
+  for(i in 1:length(new_col_names)){
+    #ignore i when = 1
+    if(i > 1){
+      index1 <- (4*i-7)
+      index2 <- 4*(i-1)
+      vector1 <- old_col_names[c(index1:index2)]
+      vector2 <- c(vector1, rep(NA, max_length - length(vector1)))
+      dataframe <- cbind(dataframe,setNames(data.frame(vector2), new_col_names[i]))
+    }
+    i <- i + 4
+  }
+  return(dataframe)
+}
+
+dm.insect_summary <- function(data, main_col, name_set){
+  #iterate through dataset of names and generate new columns
+  for(name in names(name_set)){
+    #set target cols as column in name dataset
+    target_cols <- as.vector(name_set[[name]])
+    #set new column name as column name of name dataset
+    new_col <- toString(name)
+    data <- dm.insect_addition(data, main_col, target_cols, new_col)
+  }
+  return(data)
+}
