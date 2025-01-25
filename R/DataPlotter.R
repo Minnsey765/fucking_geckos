@@ -5,6 +5,7 @@ dp.plotter <- function(data, categories, xvar, yvar, xlab, ylab, xlim, ylim, tit
   if(is.null(categories)){
     plot(data[[xvar]],data[[yvar]], xlab=xlab, ylab=ylab, xlim=xlim, ylim=ylim, main=title, col ='black',pch=19, cex=0.65)
     lmodel <- lm(data[[yvar]] ~ data[[xvar]])
+    #print(lmodel)
     abline(a=coef(lmodel)[1], b=coef(lmodel)[2], col='black', lty=3, lwd=2)
   }
   else{
@@ -57,6 +58,7 @@ dp.cat_plotter <- function(data, categories, xvar, yvar, xlab, ylab, xlim, ylim,
     #only plot lines of best fit for datasets that are not all NAs
     if(!all(is.na(subset[[yvar]])) & !all(is.na(subset[[xvar]]))){
       lmodel <- lm(subset[[yvar]] ~ subset[[xvar]])
+      #print(lmodel)
       #ignore line draw if gradient is infinite
       if(!is.na(coef(lmodel)[2])){
         b <- coef(lmodel)[2]
@@ -79,6 +81,16 @@ dp.boxplot <- function(data, con_var, dis_var, title, xlab, ylab){
   #print(cbind(data[[con_var]],data[[dis_var]]))
   #plot box plot
   box_plot <- boxplot(data[[con_var]]~data[[dis_var]], main=title, cex.main=1, names=unique_vals, xlab = xlab, ylab=paste(ylab,con_var))
+  return(boxplot)
+}
+
+#boxplot of specific subset
+dp.spec_boxplot <- function(data, spec_col, spec_var, con_var, dis_var, title, xlab, ylab){
+  subset <- data[data[, spec_col]==spec_var,]
+  
+  boxplot <- dp.boxplot(subset, con_var, dis_var, title, xlab, ylab)
+  #do a t test too
+  #t_test <- dp.t_test(subset, con_var, dis_var)
   return(boxplot)
 }
 
@@ -118,3 +130,80 @@ dp.t_test <- function(data, con_var, dis_var){
 #  )
 #  return(plot)
 #}
+
+
+# oneway anova test + diagnostic plots
+dp.ow_anova <- function(data, xvar, yvar){
+  #make sure data is correct format
+  xcol <- data[[xvar]]
+  ycol <- as.numeric(data[[yvar]])
+  subset <- as.data.frame(cbind(xcol,ycol))
+  colnames(subset) <- c("indep","depen")
+  subset <- na.omit(subset)
+  #perform anova
+  res_aov <- aov(depen ~ indep, data = subset)
+  
+  #assumption plots
+  #par(mfrow = c(1, 2))
+  plot(res_aov)
+  print(paste("indep refers to",xvar))
+  return(summary(res_aov))
+}
+
+# twoway anova test + diagnostic plots
+dp.tw_anova <- function(data, xvar1, xvar2, yvar){
+  #make sure data is correct format
+  xcol1 <- data[[xvar1]]
+  xcol2 <- data[[xvar2]]
+  ycol <- as.numeric(data[[yvar]])
+  subset <- as.data.frame(cbind(xcol1, xcol2,ycol))
+  colnames(subset) <- c("indep1","indep2","depen")
+  subset <- na.omit(subset)
+  #perform anova
+  res_aov <- aov(depen ~ indep1 * indep2, data = subset)
+  
+  #assumption plots
+  #par(mfrow = c(1, 2))
+  plot(res_aov)
+  print(paste("indep1 refers to", xvar1, " and indep2 refers to", xvar2))
+  return(summary(res_aov))
+}
+
+
+# perform t test on 3 groups
+trip_t_test <- function(data, dis_var, con_var){
+  unique_vals <- unique(data[[dis_var]])
+  for(i in 1:length(unique_vals)){
+    #omit one value type in discrete column from dataset
+    subset <- data[data[, dis_var] != unique_vals[i],]
+    #perform t test
+    t_test <- t.test(subset[[con_var]] ~ subset[[dis_var]], subset)
+    result <- ""
+    if(t_test$p.value > 0.05){
+      result <- "no"
+    }
+    else{
+      result <- "a significant"
+    }
+    #mention what categories are being tested
+    phrase <- ""
+    if(i == 1){
+      phrase <- paste(unique_vals[i+1], "&", unique_vals[i+2])
+    }
+    else if(i == 2){
+      phrase <- paste(unique_vals[i-1], "&", unique_vals[i+1])
+    }
+    else{
+      phrase <- paste(unique_vals[i-2], "&", unique_vals[i-1])
+    }
+    print(t_test)
+    sentence <- paste("There is ", result, " difference between the treatments. (", dis_var, " ", phrase, ") (p value =", t_test$p.value, ")")
+    print(sentence)
+  }
+}
+
+#linear regression model + t statistic
+dp.regression <- function(data, xvar, yvar){
+  lmodel <- lm(data[[yvar]] ~ data[[xvar]])
+  return(summary(lmodel))
+}

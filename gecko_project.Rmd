@@ -178,6 +178,11 @@ outrm_unfltr_smooshed_data
 #plot for filtered data
 dp.boxplot(smooshed_data, "svl_vol_cm3", "quad_type","Comparison of size between geckos in different quadrats", "Quadrat type experimental or control", "Gecko")
 
+#anova for boxplot
+print("__________________________________________________________")
+print("Anova test for significance between control and experimental geckos")
+dp.ow_anova(smooshed_data, "quad_type", "svl_vol_cm3")
+
 #t test for boxplot
 print("__________________________________________________________")
 print("Formal test for significance between control and experimental geckos")
@@ -190,6 +195,11 @@ dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SV
 ```{r}
 #plot for unfiltered data
 dp.boxplot(unfltr_smooshed_data, "svl_vol_cm3", "quad_type","Comparison of size between geckos in different quadrats", "Quadrat type experimental or control", "Gecko")
+
+#anova for boxplot
+print("__________________________________________________________")
+print("Anova test for significance between control and experimental geckos")
+dp.ow_anova(unfltr_smooshed_data, "quad_type", "svl_vol_cm3")
 
 #t test for boxplot
 print("__________________________________________________________")
@@ -204,9 +214,14 @@ dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SV
 #plot for filtered outliar_removed data
 dp.boxplot(outrm_smooshed_data, "svl_vol_cm3", "quad_type","Comparison of size between geckos in different quadrats", "Quadrat type experimental or control", "Gecko")
 
+#anova for boxplot
+print("__________________________________________________________")
+print("Anova test for significance between control and experimental geckos")
+dp.ow_anova(outrm_smooshed_data, "quad_type", "svl_vol_cm3")
+
 #t test for boxplot
 print("__________________________________________________________")
-print("Formal test for significance between control and experimental geckos")
+print("Formal t-test for significance between control and experimental geckos")
 dp.t_test(outrm_smooshed_data, "svl_vol_cm3", "quad_type")
 
 dp.plotter(outrm_smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,270), "Gecko size against displacement separated by")
@@ -217,14 +232,20 @@ dp.plotter(outrm_smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ran
 #plot for filtered outliar_removed data
 dp.boxplot(outrm_unfltr_smooshed_data, "svl_vol_cm3", "quad_type","Comparison of size between geckos in different quadrats", "Quadrat type experimental or control", "Gecko")
 
+#anova for boxplot
+print("__________________________________________________________")
+print("Anova test for significance between control and experimental geckos")
+dp.ow_anova(outrm_unfltr_smooshed_data, "quad_type", "svl_vol_cm3")
+
 #t test for boxplot
 print("__________________________________________________________")
-print("Formal test for significance between control and experimental geckos")
+print("Formal t-test for significance between control and experimental geckos")
 dp.t_test(outrm_unfltr_smooshed_data, "svl_vol_cm3", "quad_type")
 
 dp.plotter(outrm_unfltr_smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,270), "Gecko size against displacement separated by")
 
 dp.plotter(outrm_unfltr_smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,300), "Gecko size against distance separated by")
+
 ```
 ```{r}
 #vector of column names
@@ -242,13 +263,30 @@ clean_abd_data
 # Abundance data analysis
 dp.plotter(clean_abd_data, c("time"), "log_light", "gek_num", "Log light intensity of quadrat", "Gecko abundance in quadrat", c(0,9), c(0,10), "Gecko abundance separated by")
 
+#anova test
+#dp.anova(clean_abd_data, "log_light", "gek_num")
+
 #plot clustering plot for comparison
 #dp.kmeans(clean_abd_data, "log_light", "gek_num", 2)
 
 dp.plotter(clean_abd_data, c("time"), "log_rli", "gek_num", "Log of relative to ambient light intensity of quadrat", "Gecko abundance in quadrat", c(-5,6), c(0,10), "Gecko abundance separated by")
 
+dp.boxplot(clean_abd_data, "gek_num", "time","Distribution of geckos at different times of day", "Time of day", "Gecko abundance")
+
+#anova test
+print("__________________________________________________________")
+print("Anova test for gecko abundance across day")
+dp.ow_anova(clean_abd_data, "time", "gek_num")
+
+#t test
+print("__________________________________________________________")
+print("T-test test for for gecko abundance across day")
+trip_t_test(clean_abd_data, "time", "gek_num")
+
 #plot clustering plot for comparison
 #dp.kmeans(clean_abd_data, "log_rli", "gek_num", 2)
+
+
 ```
 ```{r}
 #generate a name set of columns to be iterated through and summarized
@@ -266,8 +304,92 @@ clean_abd_data
 ```
 ```{r}
 dp.plotter(clean_abd_data, NULL, "insect_total", "gek_num", "Insect abundance around light", "Gecko abundance in quadrat", c(0,40), c(0,10), "Gecko abundance against insect abundance")
+
+#linear regression
+dp.regression(clean_abd_data, "insect_total", "gek_num")
+```
+```{r}
+#insects attracted to light
+dp.plotter(clean_abd_data, "time", "log_light", "insect_total", "Log light intensity", "Insect abundance in quadrat", c(0,10), c(0,40), "Insect abundance against light intensity")
+
+dp.boxplot(clean_abd_data, "log_light", "time","Log light intensity at different times of day", "Time of day", "Log light intensity")
+
+#anova test
+print("__________________________________________________________")
+print("Anova test for log light over course of day")
+dp.ow_anova(clean_abd_data,"time", "log_light")
+
+#t test
+print("__________________________________________________________")
+print("t test for log light over course of day")
+trip_t_test(clean_abd_data, "time", "log_light")
+
+dp.plotter(clean_abd_data, "time", "log_rli", "insect_total", "Log of relative light intensity", "Insect abundance in quadrat", c(0,6), c(0,40), "Insect abundance against light intensity")
+
+dp.boxplot(clean_abd_data, "log_rli", "time","Log of relative light intensity at different times of day", "Time of day", "Log of rli")
+
+#anova test
+print("__________________________________________________________")
+print("Anova test for log rli over course of day")
+dp.ow_anova(clean_abd_data,"time", "log_rli")
+
+#t test
+print("__________________________________________________________")
+print("t test for log rli over course of day")
+trip_t_test(clean_abd_data, "time", "log_rli")
+```
+```{r}
+dp.boxplot(clean_abd_data, "insect_total", "time","Insect abundance at different times of day", "Time of day", "Insect abundance")
+
+#anova test
+print("__________________________________________________________")
+print("Anova test for insect abundance over course of day")
+dp.ow_anova(clean_abd_data,"time", "gek_num")
+
+#t test
+print("__________________________________________________________")
+print("t test for insect abundance over course of day")
+trip_t_test(clean_abd_data, "time", "insect_total")
+
 ```
 
+```{r}
+#plot gecko abundance by zone
+#dp.plotter(clean_abd_data, "time", "zone", "gek_num", "Zone", "Gecko abundance in quadrat", c(0,3), c(0,10), "Gecko abundance across each zone at night")
+
+dp.spec_boxplot(clean_abd_data, "time", "m", "gek_num", "zone", "Gecko abundance across each zone in the morning", "Zone", "Gecko abundance in quadrat")
+
+dp.spec_boxplot(clean_abd_data, "time", "a", "gek_num", "zone", "Gecko abundance across each zone in the afternoon", "Zone", "Gecko abundance in quadrat")
+
+dp.spec_boxplot(clean_abd_data, "time", "n", "gek_num", "zone", "Gecko abundance across each zone at night", "Zone", "Gecko abundance in quadrat")
+
+#anova test
+print("__________________________________________________________")
+print("Anova test for gecko abundance across each zone at night")
+dp.tw_anova(clean_abd_data, "zone", "time", "gek_num")
+
+#t test
+print("__________________________________________________________")
+print("T-test test for gecko abundance across each zone at night")
+trip_t_test(clean_abd_data, "zone", "gek_num")
+
+
+```
+```{r}
+dp.plotter(clean_abd_data, "time", "temp", "gek_num", "Temperature /C", "Gecko abundance in quadrat", c(20,40), c(0,10), "Temperature against gecko abundance separated by")
+
+dp.boxplot(clean_abd_data, "temp", "time","Temperature of quadrats at different times of day", "Time of day", "Temperature")
+
+#anova test
+print("__________________________________________________________")
+print("Anova test for temperature across day")
+dp.ow_anova(clean_abd_data, "time", "temp")
+
+#t test
+print("__________________________________________________________")
+print("T-test test for temperature across day")
+trip_t_test(clean_abd_data, "time", "temp")
 
 
 
+```
