@@ -21,6 +21,7 @@ source("R/DataPlotter.R")
 #install packages
 #install.packages("factoextra")
 library(factoextra)
+library(MuMIn)
 ```
 
 ```{r}
@@ -185,8 +186,13 @@ dp.ow_anova(smooshed_data, "quad_type", "svl_vol_cm3")
 
 #t test for boxplot
 print("__________________________________________________________")
-print("Formal test for significance between control and experimental geckos")
+print("Formal t test for significance between control and experimental geckos")
 dp.t_test(smooshed_data, "svl_vol_cm3", "quad_type")
+
+#kruskal wallace
+print("__________________________________________________________")
+print("Formal kruskal wallace test for significance between control and experimental geckos")
+dp.kruskal(smooshed_data, "svl_vol_cm3", "quad_type")
 
 dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "SVL /cm3", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against displacement separated by")
 
@@ -203,12 +209,31 @@ dp.ow_anova(unfltr_smooshed_data, "quad_type", "svl_vol_cm3")
 
 #t test for boxplot
 print("__________________________________________________________")
-print("Formal test for significance between control and experimental geckos")
+print("Formal t test for significance between control and experimental geckos")
 dp.t_test(unfltr_smooshed_data, "svl_vol_cm3", "quad_type")
 
+#kruskal wallace
+print("__________________________________________________________")
+print("Formal kruskal wallace test for significance between control and experimental geckos")
+dp.kruskal(unfltr_smooshed_data, "svl_vol_cm3", "quad_type")
+
+#ranked data
 dp.plotter(unfltr_smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against displacement separated by")
 
-dp.plotter(smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,450), "Gecko size against distance separated by")
+dp.plotter(unfltr_smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,450), "Gecko size against distance separated by")
+
+dp.plotter(unfltr_smooshed_data, c("Gecko.sp."), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against distance separated by")
+
+dp.plotter(unfltr_smooshed_data, c("Gecko.sp."), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,450), "Gecko size against distance separated by")
+
+#raw data
+dp.plotter(unfltr_smooshed_data, c("time"), "svl_vol_cm3", "disp_light_cm", "SVL /cm3", "Displacement from light source /cm", c(0,50), c(0,300), "Gecko size against distance separated by")
+
+dp.plotter(unfltr_smooshed_data, c("time"), "svl_vol_cm3", "dist_light_cm", "SVL /cm3", "Distance from light source /cm", c(0,50), c(0,450), "Gecko size against distance separated by")
+
+dp.plotter(unfltr_smooshed_data, c("Gecko.sp."), "svl_vol_cm3", "disp_light_cm", "SVL /cm3", "Displacement from light source /cm", c(0,50), c(0,300), "Gecko size against distance separated by")
+
+dp.plotter(unfltr_smooshed_data, c("Gecko.sp."), "svl_vol_cm3", "dist_light_cm", "SVL /cm3", "Distance from light source /cm", c(0,50), c(0,450), "Gecko size against distance separated by")
 ```
 ```{r}
 #plot for filtered outliar_removed data
@@ -224,10 +249,175 @@ print("__________________________________________________________")
 print("Formal t-test for significance between control and experimental geckos")
 dp.t_test(outrm_smooshed_data, "svl_vol_cm3", "quad_type")
 
+#kruskal wallace
+print("__________________________________________________________")
+print("Formal kruskal wallace test for significance between control and experimental geckos")
+dp.kruskal(outrm_smooshed_data, "svl_vol_cm3", "quad_type")
+
+#rank data
 dp.plotter(outrm_smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,270), "Gecko size against displacement separated by")
 
 dp.plotter(outrm_smooshed_data, c("time"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,300), "Gecko size against distance separated by")
+
+dp.plotter(outrm_smooshed_data, c("Gecko.sp."), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against distance separated by")
+
+dp.plotter(outrm_smooshed_data, c("Gecko.sp."), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,450), "Gecko size against distance separated by")
+
+dp.plotter(outrm_smooshed_data, c("tail_present"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,300), "Gecko size against distance separated by")
+
+dp.plotter(outrm_smooshed_data, c("tail_present"), "svl_vol_rank", "dist_light_cm", "Ranked SVL", "Distance from light source /cm", c(0,10), c(0,450), "Gecko size against distance separated by")
+
+#raw data
+dp.plotter(outrm_smooshed_data, c("time"), "svl_vol_cm3", "disp_light_cm", "SVL /cm3", "Displacement from light source /cm", c(0,50), c(0,300), "Gecko size against distance separated by")
+
+dp.plotter(outrm_smooshed_data, c("time"), "svl_vol_cm3", "dist_light_cm", "SVL /cm3", "Distance from light source /cm", c(0,50), c(0,450), "Gecko size against distance separated by")
+
+dp.plotter(outrm_smooshed_data, c("Gecko.sp."), "svl_vol_cm3", "disp_light_cm", "SVL /cm3", "Displacement from light source /cm", c(0,50), c(0,300), "Gecko size against distance separated by")
+
+dp.plotter(outrm_smooshed_data, c("Gecko.sp."), "svl_vol_cm3", "dist_light_cm", "SVL /cm3", "Distance from light source /cm", c(0,50), c(0,450), "Gecko size against distance separated by")
+
+#dp.boxplot(outrm_smooshed_data, "disp_light_cm", "tail_present","Gecko tail presence in relation to proximity", "Gecko Tail Presence", "Displacement from light source")
+
+#print("__________________________________________________________")
+#print("Anova test for significance between geckos with and without tails")
+#dp.ow_anova(outrm_smooshed_data, "tail_present", "disp_light_cm")
+
+#print("__________________________________________________________")
+#print("Formal t-test for significance between tailed and tailess geckos")
+#dp.t_test(outrm_smooshed_data, "disp_light_cm", "tail_present")
 ```
+```{r}
+# Analysis of raw measurements
+#remove nas for lm analysis
+outrm_fltr_narm <- na.omit(outrm_smooshed_data[,c(1:28)])
+
+#also analyse unfiltered non-outliar removed data
+unfltr_narm <- na.omit(unfltr_smooshed_data[,c(1:28)])
+
+#linear model on as many variables as possible
+#outrm_fltr_narm_lm0 <- lm(disp_light_cm ~ svl_vol_cm3 + Gecko.sp. + time + Gecko.sp.:time + svl_vol_cm3:Gecko.sp. + svl_vol_cm3:time, data=outrm_fltr_narm)
+#plot(outrm_fltr_narm_lm0)
+#print(summary(outrm_fltr_narm_lm0))
+
+options(na.action = "na.fail")
+#outrm_fltr_narm_lm0.dr <- dredge(outrm_fltr_narm_lm0)
+#outrm_fltr_narm_lm0.dr
+
+
+#use only night values
+outrm_fltr_narm_n <- outrm_fltr_narm[outrm_fltr_narm$time=="n",]
+unfltr_narm_n <- unfltr_narm[unfltr_narm$time =="n",]
+#remove other species (single measurement)
+outrm_fltr_narm_n <- outrm_fltr_narm_n[outrm_fltr_narm_n$Gecko.sp. != "o",]
+unfltr_narm_n <- unfltr_narm_n[unfltr_narm_n$Gecko.sp. != "o",]
+outrm_fltr_narm_n
+unfltr_narm_n
+#perform linear regression with fewer variables
+#outrm_fltr_narm_lm1 <- lm(disp_light_cm ~ svl_vol_cm3 + Gecko.sp. + svl_vol_cm3:Gecko.sp., data=outrm_fltr_narm_n)
+
+#rank the models
+#outrm_fltr_narm_n.dr <- dredge(outrm_fltr_narm_lm1)
+#outrm_fltr_narm_n.dr
+
+#plot(outrm_fltr_narm_lm1)
+#print(summary(outrm_fltr_narm_lm1))
+
+#lm with tail presence as variable
+#outrm_fltr_narm_lm2 <- lm(disp_light_cm ~ svl_vol_cm3 + Gecko.sp. + #tail_present + svl_vol_cm3:Gecko.sp. + tail_present:svl_vol_cm3 + #tail_present:Gecko.sp., data=outrm_fltr_narm_n)
+
+#plot(outrm_fltr_narm_lm2)
+#print(summary(outrm_fltr_narm_lm2))
+
+#outrm_fltr_narm_lm2.dr <- dredge(outrm_fltr_narm_lm2)
+#outrm_fltr_narm_lm2.dr
+
+#lm with tail present only
+#outrm_fltr_narm_lm3 <- lm(disp_light_cm ~ svl_vol_cm3 + tail_present + #tail_present:svl_vol_cm3, data=outrm_fltr_narm_n)
+
+#plot(outrm_fltr_narm_lm3)
+#print(summary(outrm_fltr_narm_lm3))
+
+#outrm_fltr_narm_lm3.dr <- dredge(outrm_fltr_narm_lm3)
+#outrm_fltr_narm_lm3.dr
+
+#Analysis of ranked measurements
+#outrm_fltr_narm_ranklm <- lm(disp_light_cm ~ svl_vol_rank + Gecko.sp. + svl_vol_rank:Gecko.sp., data=outrm_fltr_narm_n)
+
+#plot(outrm_fltr_narm_ranklm)
+#print(summary(outrm_fltr_narm_ranklm))
+
+
+
+dp.boxplot(outrm_fltr_narm_n,"disp_light_cm", "tail_present","Gecko proximity to light in relation to tail presence","Tail presence (1 = present, 0 = absent)", "Displacement from light source")
+
+print("statistical analysis of smallest dataset")
+dp.t_test(outrm_fltr_narm_n, "disp_light_cm", "tail_present")
+dp.kruskal(outrm_fltr_narm_n, "disp_light_cm", "tail_present")
+
+
+#only 5 tailless entries if use na.omit might have removed unnessesary rows
+length((unfltr_smooshed_data[unfltr_smooshed_data$tail_present == "0",]$tail_present))
+length((outrm_fltr_narm_n[outrm_fltr_narm_n$tail_present == "0",]$tail_present))
+length((unfltr_narm_n[unfltr_narm_n$tail_present == "0",]$tail_present))
+
+#remove only nas from tail_present column
+#unfltr_smooshed_data
+bigdata_narm <- unfltr_smooshed_data[(unfltr_smooshed_data$tail_present) != "na",]
+bigdata_narm <- bigdata_narm[bigdata_narm$time == "n",]
+bigdata_narm
+#repeat for all other datasets
+#outrm_unfltr_narm <- outrm_unfltr_smooshed_data[outrm_unfltr_smooshed_data$tail_present != "na",]
+
+#fltr_narm <- smooshed_data[smooshed_data$tail_present != "na",]
+
+
+outrm_fltr_narm_ranklm1 <- lm(disp_light_cm ~ tail_present, data=outrm_fltr_narm_n)
+
+plot(outrm_fltr_narm_ranklm1)
+print(summary(outrm_fltr_narm_ranklm1))
+
+outrm_fltr_narm_ranklm1.dr <- dredge(outrm_fltr_narm_ranklm1)
+outrm_fltr_narm_ranklm1.dr
+
+options(na.action = "na.omit")
+
+
+#try analysis with unfiltered and outliar remaining dataset
+dp.boxplot(bigdata_narm[bigdata_narm$time == "n",],"disp_light_cm", "tail_present","Gecko proximity to light in relation to tail presence","Tail presence (1 = present, 0 = absent)", "Displacement from light source")
+
+print("statistical analysis of largest dataset")
+dp.t_test(bigdata_narm[bigdata_narm$time == "n",], "disp_light_cm", "tail_present")
+#dp.kruskal(bigdata_narm, "disp_light_cm", "tail_present")
+dp.mannwhitney(bigdata_narm[bigdata_narm$time == "n",], "disp_light_cm", "tail_present")
+length((bigdata_narm[bigdata_narm$tail_present == "0",]$tail_present))
+
+#try analysis with unfiltered and outliar removed dataset
+#dp.boxplot(outrm_unfltr_narm[outrm_unfltr_narm$time == "n",],"disp_light_cm", "tail_present","Gecko proximity to light in relation to tail presence","Tail presence (1 = present, 0 = absent)", "Displacement from light source")
+
+#print("statistical analysis of largest dataset")
+#dp.t_test(outrm_unfltr_narm, "disp_light_cm", "tail_present")
+#dp.kruskal(outrm_unfltr_narm, "disp_light_cm", "tail_present")
+
+#length((outrm_unfltr_narm[outrm_unfltr_narm$tail_present == "0",]$tail_present))
+
+
+#try analysis with unfiltered and outliar removed dataset
+#dp.boxplot(fltr_narm[fltr_narm$time == "n",],"disp_light_cm", "tail_present","Gecko proximity to light in relation to tail presence","Tail presence (1 = present, 0 = absent)", "Displacement from light source")
+
+#print("statistical analysis of largest dataset")
+#dp.t_test(fltr_narm, "disp_light_cm", "tail_present")
+#dp.kruskal(fltr_narm, "disp_light_cm", "tail_present")
+
+#length((fltr_narm[fltr_narm$tail_present == "0",]$tail_present))
+
+dp.boxplot(bigdata_narm[bigdata_narm$time == "n",],"svl_vol_cm3", "quad_type","Gecko size across quadrat type","Quadrat type (experimental or control)", "Gecko volume estimate (SVL)")
+
+print("statistical analysis of largest dataset")
+dp.t_test(bigdata_narm[bigdata_narm$time == "n",], "svl_vol_cm3", "quad_type")
+#dp.kruskal(bigdata_narm, "disp_light_cm", "tail_present")
+dp.mannwhitney(bigdata_narm[bigdata_narm$time == "n",], "svl_vol_cm3", "quad_type")
+```
+
 ```{r}
 #plot for filtered outliar_removed data
 dp.boxplot(outrm_unfltr_smooshed_data, "svl_vol_cm3", "quad_type","Comparison of size between geckos in different quadrats", "Quadrat type experimental or control", "Gecko")
@@ -241,6 +431,11 @@ dp.ow_anova(outrm_unfltr_smooshed_data, "quad_type", "svl_vol_cm3")
 print("__________________________________________________________")
 print("Formal t-test for significance between control and experimental geckos")
 dp.t_test(outrm_unfltr_smooshed_data, "svl_vol_cm3", "quad_type")
+
+#kruskal wallace
+print("__________________________________________________________")
+print("Formal kruskal wallace test for significance between control and experimental geckos")
+dp.kruskal(outrm_unfltr_smooshed_data, "svl_vol_cm3", "quad_type")
 
 dp.plotter(outrm_unfltr_smooshed_data, c("time"), "svl_vol_rank", "disp_light_cm", "Ranked SVL", "Displacement from light source /cm", c(0,10), c(0,270), "Gecko size against displacement separated by")
 
@@ -263,13 +458,12 @@ clean_abd_data
 # Abundance data analysis
 dp.plotter(clean_abd_data, c("time"), "log_light", "gek_num", "Log light intensity of quadrat", "Gecko abundance in quadrat", c(0,9), c(0,10), "Gecko abundance separated by")
 
-#anova test
-#dp.anova(clean_abd_data, "log_light", "gek_num")
-
 #plot clustering plot for comparison
-#dp.kmeans(clean_abd_data, "log_light", "gek_num", 2)
+dp.kmeans(clean_abd_data, "log_light", "gek_num", 2)
 
 dp.plotter(clean_abd_data, c("time"), "log_rli", "gek_num", "Log of relative to ambient light intensity of quadrat", "Gecko abundance in quadrat", c(-5,6), c(0,10), "Gecko abundance separated by")
+
+dp.kmeans(clean_abd_data, "log_rli", "gek_num", 2)
 
 dp.boxplot(clean_abd_data, "gek_num", "time","Distribution of geckos at different times of day", "Time of day", "Gecko abundance")
 
@@ -279,12 +473,14 @@ print("Anova test for gecko abundance across day")
 dp.ow_anova(clean_abd_data, "time", "gek_num")
 
 #t test
-print("__________________________________________________________")
-print("T-test test for for gecko abundance across day")
-trip_t_test(clean_abd_data, "time", "gek_num")
+#print("__________________________________________________________")
+#print("T-test test for for gecko abundance across day")
+#trip_t_test(clean_abd_data, "time", "gek_num")
 
-#plot clustering plot for comparison
-#dp.kmeans(clean_abd_data, "log_rli", "gek_num", 2)
+#kruskal wallace
+print("__________________________________________________________")
+print("Formal kruskal wallace test for significance between control and experimental geckos")
+dp.trip_kruskal(clean_abd_data, "time", "gek_num")
 
 
 ```
@@ -307,38 +503,27 @@ dp.plotter(clean_abd_data, NULL, "insect_total", "gek_num", "Insect abundance ar
 
 #linear regression
 dp.regression(clean_abd_data, "insect_total", "gek_num")
+
+print("__________________________________________________________")
+print("Spearman's rank")
+dp.spearman(clean_abd_data, "insect_total", "gek_num")
+#dp.scale_reg(clean_abd_data, "insect_total", "gek_num")
+
+#dp.plotter(scale(clean_abd_data),NULL, "insect_total", "gek_num", "Insect abundance around light (scaled)", "Gecko abundance in quadrat", c(0,40), c(0,10), "Gecko abundance against insect abundance")
+#linear regression on scaled data
+
+
 ```
 ```{r}
 #insects attracted to light
 dp.plotter(clean_abd_data, "time", "log_light", "insect_total", "Log light intensity", "Insect abundance in quadrat", c(0,10), c(0,40), "Insect abundance against light intensity")
 
-dp.boxplot(clean_abd_data, "log_light", "time","Log light intensity at different times of day", "Time of day", "Log light intensity")
-
-#anova test
-print("__________________________________________________________")
-print("Anova test for log light over course of day")
-dp.ow_anova(clean_abd_data,"time", "log_light")
-
-#t test
-print("__________________________________________________________")
-print("t test for log light over course of day")
-trip_t_test(clean_abd_data, "time", "log_light")
+dp.kmeans(clean_abd_data, "log_light", "insect_total", 2)
 
 dp.plotter(clean_abd_data, "time", "log_rli", "insect_total", "Log of relative light intensity", "Insect abundance in quadrat", c(0,6), c(0,40), "Insect abundance against light intensity")
 
-dp.boxplot(clean_abd_data, "log_rli", "time","Log of relative light intensity at different times of day", "Time of day", "Log of rli")
+dp.kmeans(clean_abd_data, "log_rli", "insect_total", 2)
 
-#anova test
-print("__________________________________________________________")
-print("Anova test for log rli over course of day")
-dp.ow_anova(clean_abd_data,"time", "log_rli")
-
-#t test
-print("__________________________________________________________")
-print("t test for log rli over course of day")
-trip_t_test(clean_abd_data, "time", "log_rli")
-```
-```{r}
 dp.boxplot(clean_abd_data, "insect_total", "time","Insect abundance at different times of day", "Time of day", "Insect abundance")
 
 #anova test
@@ -351,6 +536,40 @@ print("__________________________________________________________")
 print("t test for insect abundance over course of day")
 trip_t_test(clean_abd_data, "time", "insect_total")
 
+#kruskal wallace
+print("__________________________________________________________")
+print("Formal kruskal wallace test for significance between control and experimental geckos")
+dp.trip_kruskal(clean_abd_data, "time", "insect_total")
+```
+```{r}
+dp.boxplot(clean_abd_data, "log_light", "time","Log light intensity at different times of day", "Time of day", "Log light intensity")
+
+#anova test
+print("__________________________________________________________")
+print("Anova test for log light over course of day")
+dp.ow_anova(clean_abd_data,"time", "log_light")
+
+#t test
+print("__________________________________________________________")
+print("t test for log light over course of day")
+trip_t_test(clean_abd_data, "time", "log_light")
+
+dp.boxplot(clean_abd_data, "log_rli", "time","Log of relative light intensity at different times of day", "Time of day", "Log of rli")
+
+#anova test
+print("__________________________________________________________")
+print("Anova test for log rli over course of day")
+dp.ow_anova(clean_abd_data,"time", "log_rli")
+
+#t test
+print("__________________________________________________________")
+print("t test for log rli over course of day")
+trip_t_test(clean_abd_data, "time", "log_rli")
+
+#kruskal wallace
+print("__________________________________________________________")
+print("Formal kruskal wallace test for significance between control and experimental geckos")
+dp.trip_kruskal(clean_abd_data, "time", "log_rli")
 ```
 
 ```{r}
@@ -363,6 +582,12 @@ dp.spec_boxplot(clean_abd_data, "time", "a", "gek_num", "zone", "Gecko abundance
 
 dp.spec_boxplot(clean_abd_data, "time", "n", "gek_num", "zone", "Gecko abundance across each zone at night", "Zone", "Gecko abundance in quadrat")
 
+dp.spec_boxplot(clean_abd_data, "time", "m", "insect_total", "zone", "Insect abundance across each zone in the morning", "Zone", "Insect abundance in quadrat")
+
+dp.spec_boxplot(clean_abd_data, "time", "a", "insect_total", "zone", "Insect abundance across each zone in the afternoon", "Zone", "Insect abundance in quadrat")
+
+dp.spec_boxplot(clean_abd_data, "time", "n", "insect_total", "zone", "Insect abundance across each zone at night", "Zone", "Insect abundance in quadrat")
+
 #anova test
 print("__________________________________________________________")
 print("Anova test for gecko abundance across each zone at night")
@@ -373,10 +598,25 @@ print("__________________________________________________________")
 print("T-test test for gecko abundance across each zone at night")
 trip_t_test(clean_abd_data, "zone", "gek_num")
 
+#kruskal wallace
+print("__________________________________________________________")
+print("Formal kruskal wallace test for significance between control and experimental geckos")
+dp.trip_kruskal(clean_abd_data, "zone", "gek_num")
 
+dp.gekdate_plotter(clean_abd_data, "2", "gek_num", "n", "Date", "Gecko abundance", c(10,15), c(0,6), "Gecko abundance across time in zone")
 ```
 ```{r}
+#add quad_type column
+clean_abd_data <- dm.quad_type(clean_abd_data, "quadrat", "quad_type")
+write.csv(clean_abd_data, "data/clean_abd_data.csv")
+clean_abd_data
+
 dp.plotter(clean_abd_data, "time", "temp", "gek_num", "Temperature /C", "Gecko abundance in quadrat", c(20,40), c(0,10), "Temperature against gecko abundance separated by")
+
+dp.kmeans(clean_abd_data, "temp", "gek_num", 2)
+
+#palette("default")
+#graphics::par(reset = TRUE)
 
 dp.boxplot(clean_abd_data, "temp", "time","Temperature of quadrats at different times of day", "Time of day", "Temperature")
 
@@ -391,5 +631,107 @@ print("T-test test for temperature across day")
 trip_t_test(clean_abd_data, "time", "temp")
 
 
-
+#kruskal wallace
+print("__________________________________________________________")
+print("Formal kruskal wallace test for significance between control and experimental geckos")
+dp.trip_kruskal(clean_abd_data, "time", "temp")
 ```
+```{r}
+#look at difference between temperature of exp and ctrl quadrats at night
+clean_abd_data_n <- clean_abd_data[clean_abd_data$time=="n",]
+
+dp.boxplot(clean_abd_data_n, "temp", "quad_type","Temperature of quadrat types at night", "Quadrat type (experimental or control)", "Temperature")
+
+#anova test
+print("__________________________________________________________")
+print("Anova test for temperature between control and experimental quadrats at night")
+dp.ow_anova(clean_abd_data_n, "quad_type", "temp")
+
+#t test
+print("__________________________________________________________")
+print("T-test test for temperature diff between quadrat types at night")
+dp.t_test(clean_abd_data_n, "temp", "quad_type")
+
+#at night are geckos more abundant in quadrats with light or not
+dp.boxplot(clean_abd_data_n, "gek_num", "quad_type","Gecko abundance in different quadrat types at night", "Quadrat type (experimental or control)", "Gecko Abundance")
+
+print("__________________________________________________________")
+print("Anova test for abundance between control and experimental quadrats at night")
+dp.ow_anova(clean_abd_data_n, "quad_type", "gek_num")
+
+print("__________________________________________________________")
+print("Kruskal-Wallace test for abundance between control and experimental quadrats at night")
+dp.kruskal(clean_abd_data_n, "gek_num", "quad_type")
+
+#at night are insects more abundant in quadrats with light or not
+dp.boxplot(clean_abd_data_n, "insect_total", "quad_type","Insect abundance in different quadrat types at night", "Quadrat type (experimental or control)", "Insect Abundance")
+
+print("__________________________________________________________")
+print("Anova test for abundance between control and experimental quadrats at night")
+dp.ow_anova(clean_abd_data_n, "quad_type", "insect_total")
+
+print("__________________________________________________________")
+print("Kruskal-Wallace test for abundance between control and experimental quadrats at night")
+dp.kruskal(clean_abd_data_n, "insect_total", "quad_type")
+
+#at night light intensity higher in exp quadrat than ctrl
+dp.boxplot(clean_abd_data_n, "log_light", "quad_type","Light intensity in different quadrat types at night", "Quadrat type (experimental or control)", "Log light intensity")
+
+dp.mannwhitney(clean_abd_data_n, "log_light", "quad_type")
+
+print("__________________________________________________________")
+print("Anova test for for difference in light intensity  between control and experimental quadrats at night")
+dp.ow_anova(clean_abd_data_n, "quad_type", "log_light")
+
+print("__________________________________________________________")
+print("Kruskal-Wallace test for difference in light intensity between control and experimental quadrats at night")
+dp.kruskal(clean_abd_data_n, "log_light", "quad_type")
+
+
+
+
+dp.boxplot(clean_abd_data, "insect_total", "zone","Insect abundance across different zones", "Zone", "Insect abundance")
+
+print("__________________________________________________________")
+print("Anova test for insect abundance across zone")
+dp.ow_anova(clean_abd_data, "zone", "insect_total")
+
+print("__________________________________________________________")
+print("Kruskal-Wallace test insect abundance across zone")
+dp.trip_kruskal(clean_abd_data, "zone", "insect_total")
+
+dp.boxplot(clean_abd_data_n, "insect_total", "zone","Insect abundance across different zones at night", "Zone", "Insect abundance")
+
+print("__________________________________________________________")
+print("Anova test for insect abundance across zone at night")
+dp.ow_anova(clean_abd_data_n, "zone", "insect_total")
+
+print("__________________________________________________________")
+print("Kruskal-Wallace test insect abundance across zone at night")
+dp.trip_kruskal(clean_abd_data_n, "zone", "insect_total")
+
+dp.boxplot(clean_abd_data_n, "gek_num", "zone","Gecko abundance across different zones at night", "Zone", "Gecko abundance")
+
+print("__________________________________________________________")
+print("Anova test for gecko abundance across zone at night")
+dp.ow_anova(clean_abd_data_n, "zone", "gek_num")
+
+print("__________________________________________________________")
+print("Kruskal-Wallace test gecko abundance across zone at night")
+dp.trip_kruskal(clean_abd_data_n, "zone", "gek_num")
+
+#test whether significantly less geckos in control or exp in zone 2 at night
+clean_abd_data_n_z2 <- clean_abd_data_n[clean_abd_data_n$zone=="2",]
+print(clean_abd_data_n_z2)
+dp.boxplot(clean_abd_data_n_z2, "gek_num", "quad_type","Gecko abundance across different quadrats at night", "Quadrat type (experimental or control)", "Gecko abundance")
+
+print("__________________________________________________________")
+print("Anova test for gecko abundance in different quadrats in zone 2 at night")
+dp.ow_anova(clean_abd_data_n, "quad_type", "gek_num")
+
+print("__________________________________________________________")
+print("Kruskal-Wallace test for gecko abundance in different quadrats in zone 2 at night")
+dp.kruskal(clean_abd_data_n, "gek_num", "quad_type")
+```
+
+
