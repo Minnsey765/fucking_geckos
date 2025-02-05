@@ -416,6 +416,7 @@ print("statistical analysis of largest dataset")
 dp.t_test(bigdata_narm[bigdata_narm$time == "n",], "svl_vol_cm3", "quad_type")
 #dp.kruskal(bigdata_narm, "disp_light_cm", "tail_present")
 dp.mannwhitney(bigdata_narm[bigdata_narm$time == "n",], "svl_vol_cm3", "quad_type")
+length((bigdata_narm[bigdata_narm$tail_present == "0",]$tail_present))
 ```
 
 ```{r}
@@ -663,6 +664,8 @@ print("__________________________________________________________")
 print("Kruskal-Wallace test for abundance between control and experimental quadrats at night")
 dp.kruskal(clean_abd_data_n, "gek_num", "quad_type")
 
+dp.mannwhitney(clean_abd_data_n, "gek_num", "quad_type")
+
 #at night are insects more abundant in quadrats with light or not
 dp.boxplot(clean_abd_data_n, "insect_total", "quad_type","Insect abundance in different quadrat types at night", "Quadrat type (experimental or control)", "Insect Abundance")
 
@@ -674,7 +677,7 @@ print("__________________________________________________________")
 print("Kruskal-Wallace test for abundance between control and experimental quadrats at night")
 dp.kruskal(clean_abd_data_n, "insect_total", "quad_type")
 
-#at night light intensity higher in exp quadrat than ctrl
+  #at night light intensity higher in exp quadrat than ctrl
 dp.boxplot(clean_abd_data_n, "log_light", "quad_type","Light intensity in different quadrat types at night", "Quadrat type (experimental or control)", "Log light intensity")
 
 dp.mannwhitney(clean_abd_data_n, "log_light", "quad_type")

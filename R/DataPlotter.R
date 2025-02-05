@@ -3,7 +3,7 @@
 dp.plotter <- function(data, categories, xvar, yvar, xlab, ylab, xlim, ylim, title){
   #determine whether categorize data
   if(is.null(categories)){
-    plot(data[[xvar]],data[[yvar]], xlab=xlab, ylab=ylab, xlim=xlim, ylim=ylim, main=title, col ='black',pch=19, cex=0.65)
+    plot(data[[xvar]],data[[yvar]], xlab=xlab, ylab=ylab, xlim=xlim, ylim=ylim, main=title, col ='black',pch=19, cex=0.65, las=1)
     lmodel <- lm(data[[yvar]] ~ data[[xvar]])
     #print(lmodel)
     abline(a=coef(lmodel)[1], b=coef(lmodel)[2], col='black', lty=3, lwd=2)
@@ -17,7 +17,7 @@ dp.cat_plotter <- function(data, categories, xvar, yvar, xlab, ylab, xlim, ylim,
   #dynamically generate title
   categories_title <- paste(categories, collapse=' and ')
   title <- paste(title, categories_title)
-  plot(0,0, xlab=xlab, ylab=ylab, xlim=xlim, ylim=ylim, main=title, cex.main = 1, col ='white')
+  plot(0,0, xlab=xlab, ylab=ylab, xlim=xlim, ylim=ylim, main=title, cex.main = 1, col ='white', las=2)
   #find unique values in specified column
   unique_vals <- unique(data[categories])
 
@@ -80,7 +80,8 @@ dp.boxplot <- function(data, con_var, dis_var, title, xlab, ylab){
   #unique_vals <- unique(data[[dis_var]])
   #print(cbind(data[[con_var]],data[[dis_var]]))
   #plot box plot
-  box_plot <- boxplot(data[[con_var]]~data[[dis_var]], main=title, cex.main=1, xlab = xlab, ylab=paste(ylab,con_var))
+  box_plot <- boxplot(data[[con_var]]~data[[dis_var]], main=title, cex.main=1, xlab = xlab, ylab=paste(ylab,con_var), par(las=1))
+  stripchart(data[[con_var]] ~ data[[dis_var]], method = "jitter", pch = 19, vertical = TRUE, add = TRUE, cex=.65)
   return(boxplot)
 }
 
